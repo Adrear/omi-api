@@ -1,9 +1,11 @@
 import { Module } from '@nestjs/common';
 import { VerificationsController } from './verifications.controller';
-import { RawReadingsService } from './verifications.service';
+import { VerificationsService } from './verifications.service';
+import {HttpModule} from "@nestjs/axios";
 
 @Module({
+    imports: [HttpModule],
     controllers: [VerificationsController],
-    providers: [RawReadingsService],
+    providers: [VerificationsService],
 })
 export class VerificationsModule {}

@@ -4,6 +4,7 @@ import configuration from './config/configuration';
 import { FirestoreModule } from './firestore/firestore.module';
 import { VerificationsModule } from './verifications/verifications.module';
 import {ServicesModule} from "./services/services.module";
+import {CountriesModule} from "./countries/countries.module";
 
 @Module({
     imports: [
@@ -14,12 +15,13 @@ import {ServicesModule} from "./services/services.module";
         FirestoreModule.forRoot({
             imports: [ConfigModule],
             useFactory: (configService: ConfigService) => ({
-                keyFilename: configService.get<string>('SA_KEY'),
+                keyFilename: configService.get('app.sa_key'),
             }),
             inject: [ConfigService],
         }),
         VerificationsModule,
-        ServicesModule
+        ServicesModule,
+        CountriesModule
     ],
     controllers: [],
     providers: [],
