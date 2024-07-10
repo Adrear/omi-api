@@ -6,11 +6,11 @@ import {
     FirestoreCollectionProviders,
 } from './firestore.providers';
 
-type FirestoreModuleOptions = {
+interface FirestoreModuleOptions {
     imports: any[];
     useFactory: (...args: any[]) => Settings;
     inject: any[];
-};
+}
 
 @Module({})
 export class FirestoreModule {
@@ -22,12 +22,12 @@ export class FirestoreModule {
         };
         const dbProvider = {
             provide: FirestoreDatabaseProvider,
-            useFactory: (config) => new Firestore(config),
+            useFactory: (config: Settings) => new Firestore(config),
             inject: [FirestoreOptionsProvider],
         };
         const collectionProviders = FirestoreCollectionProviders.map(providerName => ({
             provide: providerName,
-            useFactory: (db) => db.collection(providerName),
+            useFactory: (db: Firestore) => db.collection(providerName),
             inject: [FirestoreDatabaseProvider],
         }));
         return {

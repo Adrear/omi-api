@@ -1,26 +1,25 @@
-import {Inject, Injectable, Logger,} from '@nestjs/common';
-import * as dayjs from 'dayjs';
-import {CollectionReference, Timestamp} from '@google-cloud/firestore';
-import {VerificationDocument} from './documents/verification.document';
+import dayjs from 'dayjs';
+import { Inject, Injectable } from '@nestjs/common';
+import { CollectionReference, Timestamp } from '@google-cloud/firestore';
+import { VerificationDocument } from './documents/verification.document';
 
 @Injectable()
 export class RawReadingsService {
-    private logger: Logger = new Logger(RawReadingsService.name);
 
     constructor(
         @Inject(VerificationDocument.collectionName)
         private verificationsCollection: CollectionReference<VerificationDocument>,
     ) {}
 
-    async create({ name, date }): Promise<VerificationDocument> {
+    async create({ name, date }: { name: string, date: Date }): Promise<VerificationDocument> {
         const docRef = this.verificationsCollection.doc(name);
         const dateMillis = dayjs(date).valueOf();
         await docRef.set({
             name,
             date: Timestamp.fromMillis(dateMillis),
-        });
+        } as VerificationDocument); // Додайте типізацію тут як VerificationDocument
         const verificationDoc = await docRef.get();
-        return verificationDoc.data();
+        return verificationDoc.data() as VerificationDocument;
     }
 
     async findAll(): Promise<VerificationDocument[]> {

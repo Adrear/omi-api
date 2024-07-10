@@ -15,4 +15,9 @@ export class ServicesController {
         await this.servicesService.addServices(body.services);
         return { message: 'Services added successfully' };
     }
+
+    @Get('update')
+    async updateServices() {
+        return this.servicesService.updateServices();
+    }
 }
