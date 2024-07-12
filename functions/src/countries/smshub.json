@@ -1,0 +1,1148 @@
+[
+  {
+    "ID": 0,
+    "Name": "Russia",
+    "Countries": "russia",
+    "Available Operators": "aiva,any,beeline,center2m,danycom,ezmobile,gazprombank_mobile,lycamobile,matrix,mcn,megafon,motiv,mts,mtt,mtt_virtual,rostelecom,sber,simsim,tele2,tinkoff,ttk,vtb_mobile,winmobile,yota"
+  },
+  {
+    "ID": 1,
+    "Name": "Ukraine",
+    "Countries": "ukraine",
+    "Available Operators": "3mob,any,intertelecom,kyivstar,life,lycamobile,mts,utel,vodafone"
+  },
+  {
+    "ID": 2,
+    "Name": "Kazakhstan",
+    "Countries": "kazakhstan",
+    "Available Operators": "activ,altel,any,beeline,forte_mobile,kcell,tele2"
+  },
+  {
+    "ID": 3,
+    "Name": "China",
+    "Countries": "china",
+    "Available Operators": "any,chinamobile,china_unicom,unicom"
+  },
+  {
+    "ID": 4,
+    "Name": "Philippines",
+    "Countries": "philippines",
+    "Available Operators": "any,globe_telecom,smart,tm"
+  },
+  {
+    "ID": 5,
+    "Name": "Myanmar",
+    "Countries": "myanmar",
+    "Available Operators": "any,mpt,mytel,ooredoo,telenor"
+  },
+  {
+    "ID": 6,
+    "Name": "Indonesia",
+    "Countries": "indonesia",
+    "Available Operators": "any,axis,indosat,smartfren,telkomsel,three"
+  },
+  {
+    "ID": 7,
+    "Name": "Malaysia",
+    "Countries": "malaysia",
+    "Available Operators": "any,celcom,digi,hotlink,tune_talk,u_mobile,xox,yes"
+  },
+  {
+    "ID": 8,
+    "Name": "Kenya",
+    "Countries": "kenya",
+    "Available Operators": "airtel,any,econet,orange,safaricom,telkom"
+  },
+  {
+    "ID": 9,
+    "Name": "Tanzania",
+    "Countries": "tanzania",
+    "Available Operators": "airtel,any,halotel,tigo,ttcl,vodacom"
+  },
+  {
+    "ID": 10,
+    "Name": "Vietnam",
+    "Countries": "vietnam",
+    "Available Operators": "any,itelecom,mobifone,vietnamobile,viettel,vinaphone,wintel"
+  },
+  {
+    "ID": 11,
+    "Name": "Kyrgyzstan",
+    "Countries": "kyrgyzstan",
+    "Available Operators": "any,beeline,megacom,o!"
+  },
+  {
+    "ID": 12,
+    "Name": "Usa",
+    "Countries": "usa",
+    "Available Operators": "any,cellular,tmobile"
+  },
+  {
+    "ID": 13,
+    "Name": "Israel",
+    "Countries": "israel",
+    "Available Operators": "019mobile,any,golan_telecom,home_cellular,hot_mobile,jawwal,ooredoo,orange,pelephone,rami_levy"
+  },
+  {
+    "ID": 14,
+    "Name": "Hongkong",
+    "Countries": "hongkong",
+    "Available Operators": "any,chinamobile,csl_mobile,imc,lucky_sim,smartone,three,unicom"
+  },
+  {
+    "ID": 15,
+    "Name": "Poland",
+    "Countries": "poland",
+    "Available Operators": "a2_mobile,aero2,any,e_telko,heyah,klucz,lycamobile,netia,nju,orange,play,plus,plush,red_bull_mobile,tmobile,virgin"
+  },
+  {
+    "ID": 16,
+    "Name": "England",
+    "Countries": "england",
+    "Available Operators": "any,cmlink,ee,ezmobile,giffgaff,lebara,lycamobile,o2,orange,talk_telecom,tata_communications,teleena,three,tmobile,vectone,vodafone"
+  },
+  {
+    "ID": 17,
+    "Name": "Madagascar",
+    "Countries": "madagascar",
+    "Available Operators": "any,orange"
+  },
+  {
+    "ID": 18,
+    "Name": "Dcongo",
+    "Countries": "dcongo",
+    "Available Operators": "africel,airtel,any,orange,vodacom"
+  },
+  {
+    "ID": 19,
+    "Name": "Nigeria",
+    "Countries": "nigeria",
+    "Available Operators": "airtel,any,etisalat,glomobile,mtn"
+  },
+  {
+    "ID": 20,
+    "Name": "Macao",
+    "Countries": "macao",
+    "Available Operators": "3macao,any"
+  },
+  {
+    "ID": 21,
+    "Name": "Egypt",
+    "Countries": "egypt",
+    "Available Operators": "any,etisalat,orange,vodafone"
+  },
+  {
+    "ID": 22,
+    "Name": "India",
+    "Countries": "india",
+    "Available Operators": "airtel,any"
+  },
+  {
+    "ID": 23,
+    "Name": "Ireland",
+    "Countries": "ireland",
+    "Available Operators": "48mobile,any,cablenet,eir,lycamobile,tesco,vodafone"
+  },
+  {
+    "ID": 24,
+    "Name": "Cambodia",
+    "Countries": "cambodia",
+    "Available Operators": "any,metfone,smart"
+  },
+  {
+    "ID": 25,
+    "Name": "Laos",
+    "Countries": "laos",
+    "Available Operators": "any,etl,telekom,tplus,unitel"
+  },
+  {
+    "ID": 26,
+    "Name": "Haiti",
+    "Countries": "haiti",
+    "Available Operators": "any,natcom"
+  },
+  {
+    "ID": 27,
+    "Name": "Ivory",
+    "Countries": "ivory",
+    "Available Operators": "any,moov,mtn,orange"
+  },
+  {
+    "ID": 28,
+    "Name": "Gambia",
+    "Countries": "gambia",
+    "Available Operators": "africel,any,comium,gamcel,qcell"
+  },
+  {
+    "ID": 29,
+    "Name": "Serbia",
+    "Countries": "serbia",
+    "Available Operators": "a1,any,mobtel,mts,vip"
+  },
+  {
+    "ID": 30,
+    "Name": "Yemen",
+    "Countries": "yemen",
+    "Available Operators": "any,mtn,sabafon,yemen_mobile"
+  },
+  {
+    "ID": 31,
+    "Name": "Southafrica",
+    "Countries": "southafrica",
+    "Available Operators": "any,cell_c,lycamobile,mtn,telkom,vodacom"
+  },
+  {
+    "ID": 32,
+    "Name": "Romania",
+    "Countries": "romania",
+    "Available Operators": "any,benefito_mobile,digi,lycamobile,my_avon,orange,runex_telecom,telekom,vodafone"
+  },
+  {
+    "ID": 33,
+    "Name": "Colombia",
+    "Countries": "colombia",
+    "Available Operators": "any,claro,etb,exito,movistar,tigo,virgin,wom"
+  },
+  {
+    "ID": 34,
+    "Name": "Estonia",
+    "Countries": "estonia",
+    "Available Operators": "any,elisa,goodline,super,tele2,topconnect"
+  },
+  {
+    "ID": 35,
+    "Name": "Azerbaijan",
+    "Countries": "azerbaijan",
+    "Available Operators": "any,azerfon,humans"
+  },
+  {
+    "ID": 36,
+    "Name": "Canada",
+    "Countries": "canada",
+    "Available Operators": "any,cellular,chatrmobile,fido,lucky,rogers,telus"
+  },
+  {
+    "ID": 37,
+    "Name": "Morocco",
+    "Countries": "morocco",
+    "Available Operators": "any,iam,inwi,itissalat,orange"
+  },
+  {
+    "ID": 38,
+    "Name": "Ghana",
+    "Countries": "ghana",
+    "Available Operators": "airtel,any,glomobile,millicom,mtn,vodafone"
+  },
+  {
+    "ID": 39,
+    "Name": "Argentina",
+    "Countries": "argentina",
+    "Available Operators": "any,claro,movistar,personal,tuenti"
+  },
+  {
+    "ID": 40,
+    "Name": "Uzbekistan",
+    "Countries": "uzbekistan",
+    "Available Operators": "any,beeline,humans,mobiuz,mts,ucell,uzmobile"
+  },
+  {
+    "ID": 41,
+    "Name": "Cameroon",
+    "Countries": "cameroon",
+    "Available Operators": "any,mtn,nexttel,orange"
+  },
+  {
+    "ID": 42,
+    "Name": "Chad",
+    "Countries": "chad",
+    "Available Operators": "airtel,any,salam,tigo"
+  },
+  {
+    "ID": 43,
+    "Name": "Germany",
+    "Countries": "germany",
+    "Available Operators": "any,fonic,lebara,lycamobile,o2,ortel_mobile,telekom,vodafone"
+  },
+  {
+    "ID": 44,
+    "Name": "Lithuania",
+    "Countries": "lithuania",
+    "Available Operators": "any,bite,tele2,telia"
+  },
+  {
+    "ID": 45,
+    "Name": "Croatia",
+    "Countries": "croatia",
+    "Available Operators": "a1,any,bonbon,tele2,telemach,tmobile,tomato"
+  },
+  {
+    "ID": 46,
+    "Name": "Sweden",
+    "Countries": "sweden",
+    "Available Operators": "any,comviq,lycamobile,netmore,tele2,telenor,telia,three,vectone,vodafone"
+  },
+  {
+    "ID": 47,
+    "Name": "Iraq",
+    "Countries": "iraq",
+    "Available Operators": "any,asiacell,korek,zain"
+  },
+  {
+    "ID": 48,
+    "Name": "Netherlands",
+    "Countries": "netherlands",
+    "Available Operators": "any,kpn,lebara,lycamobile,l_mobi,tmobile,vodafone"
+  },
+  {
+    "ID": 49,
+    "Name": "Latvia",
+    "Countries": "latvia",
+    "Available Operators": "any,bite,lmt,tele2,xomobile"
+  },
+  {
+    "ID": 50,
+    "Name": "Austria",
+    "Countries": "austria",
+    "Available Operators": "a1,any,eety,hot_mobile,lidl,lycamobile,magenta,orange,telering,three,tmobile,wowww,yesss"
+  },
+  {
+    "ID": 51,
+    "Name": "Belarus",
+    "Countries": "belarus",
+    "Available Operators": "any,best,life,mdc,mts"
+  },
+  {
+    "ID": 52,
+    "Name": "Thailand",
+    "Countries": "thailand",
+    "Available Operators": "ais,any,cat_mobile,dtac,my,truemove"
+  },
+  {
+    "ID": 53,
+    "Name": "Saudiarabia",
+    "Countries": "saudiarabia",
+    "Available Operators": "any"
+  },
+  {
+    "ID": 54,
+    "Name": "Mexico",
+    "Countries": "mexico",
+    "Available Operators": "any,telcel"
+  },
+  {
+    "ID": 55,
+    "Name": "Taiwan",
+    "Countries": "taiwan",
+    "Available Operators": "any,chunghwa,fareast"
+  },
+  {
+    "ID": 56,
+    "Name": "Spain",
+    "Countries": "spain",
+    "Available Operators": "altecom,any,cube_movil,euskaltel,finetwork,lebara,llamaya,lycamobile,masmovil,movistar,orange,tmobile,vodafone,yoigo,you_mobile"
+  },
+  {
+    "ID": 57,
+    "Name": "Iran",
+    "Countries": "iran",
+    "Available Operators": "any,aptel,azartel,hamrah_e_aval,irancell,mtn,rightel,samantel,shatel,taliya,tci"
+  },
+  {
+    "ID": 58,
+    "Name": "Algeria",
+    "Countries": "algeria",
+    "Available Operators": "any,djezzy,mobilis,ooredoo"
+  },
+  {
+    "ID": 59,
+    "Name": "Slovenia",
+    "Countries": "slovenia",
+    "Available Operators": "a1,any,telekom,telemach"
+  },
+  {
+    "ID": 60,
+    "Name": "Bangladesh",
+    "Countries": "bangladesh",
+    "Available Operators": "any"
+  },
+  {
+    "ID": 61,
+    "Name": "Senegal",
+    "Countries": "senegal",
+    "Available Operators": "any,expresso,free,orange"
+  },
+  {
+    "ID": 62,
+    "Name": "Turkey",
+    "Countries": "turkey",
+    "Available Operators": "any,turkcell,turk_telekom,vodafone"
+  },
+  {
+    "ID": 63,
+    "Name": "Czech",
+    "Countries": "czech",
+    "Available Operators": "any,kaktus,o2,tmobile,vodafone"
+  },
+  {
+    "ID": 64,
+    "Name": "Srilanka",
+    "Countries": "srilanka",
+    "Available Operators": "airtel,any,dialog,etisalat,hutch,sltmobitel"
+  },
+  {
+    "ID": 65,
+    "Name": "Peru",
+    "Countries": "peru",
+    "Available Operators": "any,movistar"
+  },
+  {
+    "ID": 66,
+    "Name": "Pakistan",
+    "Countries": "pakistan",
+    "Available Operators": "any,jazz,ptcl,sco,telenor,ufone,zong"
+  },
+  {
+    "ID": 67,
+    "Name": "Newzealand",
+    "Countries": "newzealand",
+    "Available Operators": "2degree,any,one_nz,skinny,spark,vodafone,warehouse"
+  },
+  {
+    "ID": 68,
+    "Name": "Guinea",
+    "Countries": "guinea",
+    "Available Operators": "any,cellcom,mtn,orange,sotelgui,telecel"
+  },
+  {
+    "ID": 69,
+    "Name": "Mali",
+    "Countries": "mali",
+    "Available Operators": "any,malitel,orange,telecel"
+  },
+  {
+    "ID": 70,
+    "Name": "Venezuela",
+    "Countries": "venezuela",
+    "Available Operators": "any"
+  },
+  {
+    "ID": 71,
+    "Name": "Ethiopia",
+    "Countries": "ethiopia",
+    "Available Operators": "any,mtn,safaricom"
+  },
+  {
+    "ID": 72,
+    "Name": "Mongolia",
+    "Countries": "mongolia",
+    "Available Operators": "any,beeline"
+  },
+  {
+    "ID": 73,
+    "Name": "Brazil",
+    "Countries": "brazil",
+    "Available Operators": "algartelecom,any,arqia,claro,correios_celular,nlt,oi,tim,vivo"
+  },
+  {
+    "ID": 74,
+    "Name": "Afghanistan",
+    "Countries": "afghanistan",
+    "Available Operators": "any,salaam"
+  },
+  {
+    "ID": 75,
+    "Name": "Uganda",
+    "Countries": "uganda",
+    "Available Operators": "airtel,any,k2_telecom,lycamobile,mtn,orange,smart,smile,uganda_telecom"
+  },
+  {
+    "ID": 76,
+    "Name": "Angola",
+    "Countries": "angola",
+    "Available Operators": "africel,any,unitel"
+  },
+  {
+    "ID": 77,
+    "Name": "Cyprus",
+    "Countries": "cyprus",
+    "Available Operators": "any,cablenet,cyta,epic,lemontel,primetel,vectone,vodafone"
+  },
+  {
+    "ID": 78,
+    "Name": "France",
+    "Countries": "france",
+    "Available Operators": "any,bouygues,free,kena_mobile,lebara,lycamobile,orange,sfr,syma_mobile,vectone"
+  },
+  {
+    "ID": 79,
+    "Name": "Papua",
+    "Countries": "papua",
+    "Available Operators": "any"
+  },
+  {
+    "ID": 80,
+    "Name": "Mozambique",
+    "Countries": "mozambique",
+    "Available Operators": "any,vodacom"
+  },
+  {
+    "ID": 81,
+    "Name": "Nepal",
+    "Countries": "nepal",
+    "Available Operators": "any"
+  },
+  {
+    "ID": 82,
+    "Name": "Belgium",
+    "Countries": "belgium",
+    "Available Operators": "any,bandwidth,base,infrabel,lycamobile,nethys,orange,proximus,vectone"
+  },
+  {
+    "ID": 83,
+    "Name": "Bulgaria",
+    "Countries": "bulgaria",
+    "Available Operators": "a1,any,telenor,vivacom,yettel"
+  },
+  {
+    "ID": 84,
+    "Name": "Hungary",
+    "Countries": "hungary",
+    "Available Operators": "any,tmobile,vodafone,yettel"
+  },
+  {
+    "ID": 85,
+    "Name": "Moldova",
+    "Countries": "moldova",
+    "Available Operators": "any,idc,moldcell,orange,unite"
+  },
+  {
+    "ID": 86,
+    "Name": "Italy",
+    "Countries": "italy",
+    "Available Operators": "any,digi,ho,kena_mobile,lycamobile,nt_mobile,optima,syma_mobile,tim,vodafone,wind"
+  },
+  {
+    "ID": 87,
+    "Name": "Paraguay",
+    "Countries": "paraguay",
+    "Available Operators": "any,claro,personal"
+  },
+  {
+    "ID": 88,
+    "Name": "Honduras",
+    "Countries": "honduras",
+    "Available Operators": "any,claro"
+  },
+  {
+    "ID": 89,
+    "Name": "Tunisia",
+    "Countries": "tunisia",
+    "Available Operators": "any,ooredoo,orange,tunicell"
+  },
+  {
+    "ID": 90,
+    "Name": "Nicaragua",
+    "Countries": "nicaragua",
+    "Available Operators": "any,movistar"
+  },
+  {
+    "ID": 91,
+    "Name": "Timorleste",
+    "Countries": "timorleste",
+    "Available Operators": "any,telemor,telkomcel,timor_telecom"
+  },
+  {
+    "ID": 92,
+    "Name": "Bolivia",
+    "Countries": "bolivia",
+    "Available Operators": "any,tigo,viva"
+  },
+  {
+    "ID": 93,
+    "Name": "Costarica",
+    "Countries": "costarica",
+    "Available Operators": "any"
+  },
+  {
+    "ID": 94,
+    "Name": "Guatemala",
+    "Countries": "guatemala",
+    "Available Operators": "any,claro,movistar,tigo"
+  },
+  {
+    "ID": 95,
+    "Name": "Uae",
+    "Countries": "uae",
+    "Available Operators": "any,du"
+  },
+  {
+    "ID": 96,
+    "Name": "Zimbabwe",
+    "Countries": "zimbabwe",
+    "Available Operators": "any,econet"
+  },
+  {
+    "ID": 97,
+    "Name": "Puertorico",
+    "Countries": "puertorico",
+    "Available Operators": "any"
+  },
+  {
+    "ID": 98,
+    "Name": "Sudan",
+    "Countries": "sudan",
+    "Available Operators": "any,mtn,sudani_one,zain"
+  },
+  {
+    "ID": 99,
+    "Name": "Togo",
+    "Countries": "togo",
+    "Available Operators": "any"
+  },
+  {
+    "ID": 100,
+    "Name": "Kuwait",
+    "Countries": "kuwait",
+    "Available Operators": "any"
+  },
+  {
+    "ID": 101,
+    "Name": "Salvador",
+    "Countries": "salvador",
+    "Available Operators": "any,claro,digi,movistar,red,tigo"
+  },
+  {
+    "ID": 102,
+    "Name": "Libyan",
+    "Countries": "libyan",
+    "Available Operators": "any"
+  },
+  {
+    "ID": 103,
+    "Name": "Jamaica",
+    "Countries": "jamaica",
+    "Available Operators": "any,digi"
+  },
+  {
+    "ID": 104,
+    "Name": "Trinidad",
+    "Countries": "trinidad",
+    "Available Operators": "any"
+  },
+  {
+    "ID": 105,
+    "Name": "Ecuador",
+    "Countries": "ecuador",
+    "Available Operators": "any,claro,cnt_mobile,movistar,tuenti"
+  },
+  {
+    "ID": 106,
+    "Name": "Swaziland",
+    "Countries": "swaziland",
+    "Available Operators": "any"
+  },
+  {
+    "ID": 107,
+    "Name": "Oman",
+    "Countries": "oman",
+    "Available Operators": "any"
+  },
+  {
+    "ID": 108,
+    "Name": "Bosnia",
+    "Countries": "bosnia",
+    "Available Operators": "a1,any,hej"
+  },
+  {
+    "ID": 109,
+    "Name": "Dominican",
+    "Countries": "dominican",
+    "Available Operators": "altice,any,claro,viva"
+  },
+  {
+    "ID": 110,
+    "Name": "Syrian",
+    "Countries": "syrian",
+    "Available Operators": "any"
+  },
+  {
+    "ID": 111,
+    "Name": "Qatar",
+    "Countries": "qatar",
+    "Available Operators": "any"
+  },
+  {
+    "ID": 112,
+    "Name": "Panama",
+    "Countries": "panama",
+    "Available Operators": "any"
+  },
+  {
+    "ID": 113,
+    "Name": "Cuba",
+    "Countries": "cuba",
+    "Available Operators": "any,cubacel"
+  },
+  {
+    "ID": 114,
+    "Name": "Mauritania",
+    "Countries": "mauritania",
+    "Available Operators": "any,chinguitel,mattel,mauritel"
+  },
+  {
+    "ID": 115,
+    "Name": "Sierraleone",
+    "Countries": "sierraleone",
+    "Available Operators": "africel,airtel,any,qcell"
+  },
+  {
+    "ID": 116,
+    "Name": "Jordan",
+    "Countries": "jordan",
+    "Available Operators": "any,orange,umniah,xpress,zain"
+  },
+  {
+    "ID": 117,
+    "Name": "Portugal",
+    "Countries": "portugal",
+    "Available Operators": "any,lebara,lycamobile,nos,vodafone"
+  },
+  {
+    "ID": 118,
+    "Name": "Barbados",
+    "Countries": "barbados",
+    "Available Operators": "any"
+  },
+  {
+    "ID": 119,
+    "Name": "Burundi",
+    "Countries": "burundi",
+    "Available Operators": "africel,any,econet,lacell,telecel,viettel"
+  },
+  {
+    "ID": 120,
+    "Name": "Benin",
+    "Countries": "benin",
+    "Available Operators": "airtel,any,mtn"
+  },
+  {
+    "ID": 121,
+    "Name": "Brunei",
+    "Countries": "brunei",
+    "Available Operators": "any"
+  },
+  {
+    "ID": 122,
+    "Name": "Bahamas",
+    "Countries": "bahamas",
+    "Available Operators": "any"
+  },
+  {
+    "ID": 123,
+    "Name": "Botswana",
+    "Countries": "botswana",
+    "Available Operators": "any,be_mobile,mascom,orange"
+  },
+  {
+    "ID": 124,
+    "Name": "Belize",
+    "Countries": "belize",
+    "Available Operators": "any"
+  },
+  {
+    "ID": 125,
+    "Name": "Caf",
+    "Countries": "caf",
+    "Available Operators": "any"
+  },
+  {
+    "ID": 126,
+    "Name": "Dominica",
+    "Countries": "dominica",
+    "Available Operators": "any"
+  },
+  {
+    "ID": 127,
+    "Name": "Grenada",
+    "Countries": "grenada",
+    "Available Operators": "any"
+  },
+  {
+    "ID": 128,
+    "Name": "Georgia",
+    "Countries": "georgia",
+    "Available Operators": "any,beeline,geocell,hamrah_e_aval,magticom"
+  },
+  {
+    "ID": 129,
+    "Name": "Greece",
+    "Countries": "greece",
+    "Available Operators": "any,cosmote,ose,q_telecom,vodafone,wind"
+  },
+  {
+    "ID": 130,
+    "Name": "Guineabissau",
+    "Countries": "guineabissau",
+    "Available Operators": "any"
+  },
+  {
+    "ID": 131,
+    "Name": "Guyana",
+    "Countries": "guyana",
+    "Available Operators": "any"
+  },
+  {
+    "ID": 132,
+    "Name": "Iceland",
+    "Countries": "iceland",
+    "Available Operators": "any"
+  },
+  {
+    "ID": 133,
+    "Name": "Comoros",
+    "Countries": "comoros",
+    "Available Operators": "any"
+  },
+  {
+    "ID": 134,
+    "Name": "Saintkitts",
+    "Countries": "saintkitts",
+    "Available Operators": "any"
+  },
+  {
+    "ID": 135,
+    "Name": "Liberia",
+    "Countries": "liberia",
+    "Available Operators": "any,cellcom,comium,libercell,libtelco,lonestar"
+  },
+  {
+    "ID": 136,
+    "Name": "Lesotho",
+    "Countries": "lesotho",
+    "Available Operators": "any"
+  },
+  {
+    "ID": 137,
+    "Name": "Malawi",
+    "Countries": "malawi",
+    "Available Operators": "any"
+  },
+  {
+    "ID": 138,
+    "Name": "Namibia",
+    "Countries": "namibia",
+    "Available Operators": "any"
+  },
+  {
+    "ID": 139,
+    "Name": "Niger",
+    "Countries": "niger",
+    "Available Operators": "any"
+  },
+  {
+    "ID": 140,
+    "Name": "Rwanda",
+    "Countries": "rwanda",
+    "Available Operators": "airtel,any,mtn"
+  },
+  {
+    "ID": 141,
+    "Name": "Slovakia",
+    "Countries": "slovakia",
+    "Available Operators": "any,o2,orange"
+  },
+  {
+    "ID": 142,
+    "Name": "Suriname",
+    "Countries": "suriname",
+    "Available Operators": "any"
+  },
+  {
+    "ID": 143,
+    "Name": "Tajikistan",
+    "Countries": "tajikistan",
+    "Available Operators": "any,indigo,megafon"
+  },
+  {
+    "ID": 144,
+    "Name": "Monaco",
+    "Countries": "monaco",
+    "Available Operators": "any"
+  },
+  {
+    "ID": 145,
+    "Name": "Bahrain",
+    "Countries": "bahrain",
+    "Available Operators": "any"
+  },
+  {
+    "ID": 146,
+    "Name": "Reunion",
+    "Countries": "reunion",
+    "Available Operators": "any"
+  },
+  {
+    "ID": 147,
+    "Name": "Zambia",
+    "Countries": "zambia",
+    "Available Operators": "airtel,any,mtn,zamtel"
+  },
+  {
+    "ID": 148,
+    "Name": "Armenia",
+    "Countries": "armenia",
+    "Available Operators": "any,team,viva,vivo"
+  },
+  {
+    "ID": 149,
+    "Name": "Somalia",
+    "Countries": "somalia",
+    "Available Operators": "any"
+  },
+  {
+    "ID": 150,
+    "Name": "Congo",
+    "Countries": "congo",
+    "Available Operators": "airtel,any"
+  },
+  {
+    "ID": 151,
+    "Name": "Chile",
+    "Countries": "chile",
+    "Available Operators": "any,claro,entel,movistar,wom"
+  },
+  {
+    "ID": 152,
+    "Name": "Burkinafaso",
+    "Countries": "burkinafaso",
+    "Available Operators": "airtel,any,onatel,telecel"
+  },
+  {
+    "ID": 153,
+    "Name": "Lebanon",
+    "Countries": "lebanon",
+    "Available Operators": "alfa,any,ogero,touch"
+  },
+  {
+    "ID": 154,
+    "Name": "Gabon",
+    "Countries": "gabon",
+    "Available Operators": "any"
+  },
+  {
+    "ID": 155,
+    "Name": "Albania",
+    "Countries": "albania",
+    "Available Operators": "any,telekom,vodafone"
+  },
+  {
+    "ID": 156,
+    "Name": "Uruguay",
+    "Countries": "uruguay",
+    "Available Operators": "any,claro"
+  },
+  {
+    "ID": 157,
+    "Name": "Mauritius",
+    "Countries": "mauritius",
+    "Available Operators": "any"
+  },
+  {
+    "ID": 158,
+    "Name": "Bhutan",
+    "Countries": "bhutan",
+    "Available Operators": "any"
+  },
+  {
+    "ID": 159,
+    "Name": "Maldives",
+    "Countries": "maldives",
+    "Available Operators": "any"
+  },
+  {
+    "ID": 160,
+    "Name": "Guadeloupe",
+    "Countries": "guadeloupe",
+    "Available Operators": "any"
+  },
+  {
+    "ID": 161,
+    "Name": "Turkmenistan",
+    "Countries": "turkmenistan",
+    "Available Operators": "any"
+  },
+  {
+    "ID": 162,
+    "Name": "Frenchguiana",
+    "Countries": "frenchguiana",
+    "Available Operators": "any"
+  },
+  {
+    "ID": 163,
+    "Name": "Finland",
+    "Countries": "finland",
+    "Available Operators": "any,dna,elisa,telia"
+  },
+  {
+    "ID": 164,
+    "Name": "Saintlucia",
+    "Countries": "saintlucia",
+    "Available Operators": "any"
+  },
+  {
+    "ID": 165,
+    "Name": "Luxembourg",
+    "Countries": "luxembourg",
+    "Available Operators": "any,tango,tiptop"
+  },
+  {
+    "ID": 166,
+    "Name": "Saintvincentgrenadines",
+    "Countries": "saintvincentgrenadines",
+    "Available Operators": "any"
+  },
+  {
+    "ID": 167,
+    "Name": "Equatorialguinea",
+    "Countries": "equatorialguinea",
+    "Available Operators": "any"
+  },
+  {
+    "ID": 168,
+    "Name": "Djibouti",
+    "Countries": "djibouti",
+    "Available Operators": "any"
+  },
+  {
+    "ID": 169,
+    "Name": "Antiguabarbuda",
+    "Countries": "antiguabarbuda",
+    "Available Operators": "any"
+  },
+  {
+    "ID": 170,
+    "Name": "Caymanislands",
+    "Countries": "caymanislands",
+    "Available Operators": "any"
+  },
+  {
+    "ID": 171,
+    "Name": "Montenegro",
+    "Countries": "montenegro",
+    "Available Operators": "any"
+  },
+  {
+    "ID": 172,
+    "Name": "Denmark",
+    "Countries": "denmark",
+    "Available Operators": "any,lebara,lycamobile,telenor"
+  },
+  {
+    "ID": 173,
+    "Name": "Switzerland",
+    "Countries": "switzerland",
+    "Available Operators": "any,lebara"
+  },
+  {
+    "ID": 174,
+    "Name": "Norway",
+    "Countries": "norway",
+    "Available Operators": "any,lycamobile,my_call,telia"
+  },
+  {
+    "ID": 175,
+    "Name": "Australia",
+    "Countries": "australia",
+    "Available Operators": "any,lebara,optus,telstra,vodafone"
+  },
+  {
+    "ID": 176,
+    "Name": "Eritrea",
+    "Countries": "eritrea",
+    "Available Operators": "any"
+  },
+  {
+    "ID": 177,
+    "Name": "Southsudan",
+    "Countries": "southsudan",
+    "Available Operators": "any,mtn,zain"
+  },
+  {
+    "ID": 178,
+    "Name": "Saotomeandprincipe",
+    "Countries": "saotomeandprincipe",
+    "Available Operators": "any"
+  },
+  {
+    "ID": 179,
+    "Name": "Aruba",
+    "Countries": "aruba",
+    "Available Operators": "any"
+  },
+  {
+    "ID": 180,
+    "Name": "Montserrat",
+    "Countries": "montserrat",
+    "Available Operators": "any"
+  },
+  {
+    "ID": 181,
+    "Name": "Anguilla",
+    "Countries": "anguilla",
+    "Available Operators": "any"
+  },
+  {
+    "ID": 183,
+    "Name": "Northmacedonia",
+    "Countries": "northmacedonia",
+    "Available Operators": "a1,any,lycamobile,telekom,vip"
+  },
+  {
+    "ID": 184,
+    "Name": "Seychelles",
+    "Countries": "seychelles",
+    "Available Operators": "any"
+  },
+  {
+    "ID": 185,
+    "Name": "Newcaledonia",
+    "Countries": "newcaledonia",
+    "Available Operators": "any"
+  },
+  {
+    "ID": 186,
+    "Name": "Capeverde",
+    "Countries": "capeverde",
+    "Available Operators": "any"
+  },
+  {
+    "ID": 187,
+    "Name": "Usaphysical",
+    "Countries": "usaphysical",
+    "Available Operators": "any,at_t,boost_mobile,h2o_wireless,hello_mobile,joltmobile,lycamobile,mint_mobile,moabits,textnow,tmobile,ultra_mobile,us_mobile"
+  },
+  {
+    "ID": 189,
+    "Name": "Fiji",
+    "Countries": "fiji",
+    "Available Operators": "any,vodafone"
+  },
+  {
+    "ID": 196,
+    "Name": "Singapore",
+    "Countries": "singapore",
+    "Available Operators": "any,m1,maxx,simba,singtel,starhub"
+  },
+  {
+    "ID": 201,
+    "Name": "Gibraltar",
+    "Countries": "gibraltar",
+    "Available Operators": "any,gibtele"
+  },
+  {
+    "ID": 203,
+    "Name": "Kosovo",
+    "Countries": "kosovo",
+    "Available Operators": "any"
+  }
+]
