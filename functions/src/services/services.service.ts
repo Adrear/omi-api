@@ -2,10 +2,12 @@ import {Inject, Injectable, Logger} from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { CollectionReference } from '@google-cloud/firestore';
 import { firstValueFrom } from 'rxjs';
-import { ServiceDocument, SmshubServiceDocument, SmsActivateServiceDocument, FiveSimServiceDocument } from './documents/index.document';
+import { ServiceDocument, SmshubServiceDocument, SmsActivateServiceDocument, FiveSimServiceDocument, SimsmsServiceDocument, SmspvaServiceDocument } from './documents/index.document';
 import {ConfigService} from "@nestjs/config";
 import dataSmshub from "./smshub.json";
 import data5sim from "./5sim.json";
+import dataSimsms from "./simsms.json";
+import dataSmspva from "./smspva.json";
 
 @Injectable()
 export class ServicesService {
@@ -20,6 +22,10 @@ export class ServicesService {
         private fiveSimServicesCollection: CollectionReference<FiveSimServiceDocument>,
         @Inject(SmshubServiceDocument.collectionName)
         private smshubServicesCollection: CollectionReference<SmshubServiceDocument>,
+        @Inject(SimsmsServiceDocument.collectionName)
+        private simsmsServicesCollection: CollectionReference<SimsmsServiceDocument>,
+        @Inject(SmspvaServiceDocument.collectionName)
+        private smspvaServicesCollection: CollectionReference<SmspvaServiceDocument>,
         private readonly httpService: HttpService,
         private readonly configService: ConfigService
     ) {}
@@ -33,6 +39,12 @@ export class ServicesService {
         try {
             if (source === 'smshub') {
                 await this.addSmshubServices();
+                return { message: 'Services updated successfully' };
+            } else if (source === 'simsms') {
+                await this.addSimsmsServices();
+                return { message: 'Services updated successfully' };
+            } else if (source === 'smspva') {
+                await this.addSmspvaServices();
                 return { message: 'Services updated successfully' };
             } else if (source === '5sim') {
                 await this.addFiveSimServices();
@@ -73,6 +85,28 @@ export class ServicesService {
             batch.set(docRef, {
                 code: service['ID'],
                 name: service['Name']
+            });
+        }
+        await batch.commit();
+    }
+    private async addSimsmsServices() {
+        const batch = this.simsmsServicesCollection.firestore.batch();
+        for (const service of dataSimsms) {
+            const docRef = this.simsmsServicesCollection.doc(service['Код'].toString());
+            batch.set(docRef, {
+                code: service['Код'],
+                name: service['Сервис']
+            });
+        }
+        await batch.commit();
+    }
+    private async addSmspvaServices() {
+        const batch = this.smspvaServicesCollection.firestore.batch();
+        for (const service of dataSmspva) {
+            const docRef = this.smspvaServicesCollection.doc(service['Code'].toString());
+            batch.set(docRef, {
+                code: service['Code'],
+                name: service['Service']
             });
         }
         await batch.commit();

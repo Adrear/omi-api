@@ -2,9 +2,11 @@ import {Inject, Injectable, Logger} from '@nestjs/common';
 import {HttpService} from '@nestjs/axios';
 import {CollectionReference} from '@google-cloud/firestore';
 import {firstValueFrom} from 'rxjs';
-import {FiveSimCountryDocument, SmsActivateCountryDocument, CountryDocument, SmshubCountryDocument} from './documents/index.document';
+import {FiveSimCountryDocument, SmsActivateCountryDocument, CountryDocument, SmshubCountryDocument, SimsmsCountryDocument, SmspvaCountryDocument} from './documents/index.document';
 import {ConfigService} from "@nestjs/config";
-import data from './smshub.json'
+import dataSmshub from './smshub.json'
+import dataSimsms from './simsms.json'
+import dataSmspva from './smspva.json'
 
 @Injectable()
 export class CountriesService {
@@ -19,6 +21,10 @@ export class CountriesService {
         private fiveSimCountriesCollection: CollectionReference<FiveSimCountryDocument>,
         @Inject(SmshubCountryDocument.collectionName)
         private smshubCountriesCollection: CollectionReference<SmshubCountryDocument>,
+        @Inject(SimsmsCountryDocument.collectionName)
+        private simsmsCountriesCollection: CollectionReference<SimsmsCountryDocument>,
+        @Inject(SmspvaCountryDocument.collectionName)
+        private smspvaCountriesCollection: CollectionReference<SmspvaCountryDocument>,
         private readonly httpService: HttpService,
         private readonly configService: ConfigService
     ) {}
@@ -32,6 +38,12 @@ export class CountriesService {
         try {
             if (source === 'smshub') {
                 await this.addSmshubCountries();
+                return { message: 'Countries updated successfully' };
+            } else if (source === 'simsms') {
+                await this.addSimsmsCountries();
+                return { message: 'Countries updated successfully' };
+            } else if (source === 'smspva') {
+                await this.addSmspvaCountries();
                 return { message: 'Countries updated successfully' };
             } else {
                 const apiUrl = this.getApiUrl(source);
@@ -66,13 +78,37 @@ export class CountriesService {
     }
     private async addSmshubCountries() {
         const batch = this.smshubCountriesCollection.firestore.batch();
-        for (const country of data) {
+        for (const country of dataSmshub) {
             const docRef = this.smshubCountriesCollection.doc(country['ID'].toString());
             batch.set(docRef, {
                 id: country['ID'],
                 name: country['Name'],
                 key: country['Countries'],
                 operators: country['Available Operators'].split(',')
+            });
+        }
+        await batch.commit();
+    }
+
+    private async addSimsmsCountries() {
+        const batch = this.simsmsCountriesCollection.firestore.batch();
+        for (const country of dataSimsms) {
+            const docRef = this.simsmsCountriesCollection.doc(country['code'].toString());
+            batch.set(docRef, {
+                id: country['code'],
+                text_ru: country['country']
+            });
+        }
+        await batch.commit();
+    }
+
+    private async addSmspvaCountries() {
+        const batch = this.smspvaCountriesCollection.firestore.batch();
+        for (const country of dataSmspva) {
+            const docRef = this.smspvaCountriesCollection.doc(country['Code'].toString());
+            batch.set(docRef, {
+                id: country['Code'],
+                text_en: country['Country']
             });
         }
         await batch.commit();

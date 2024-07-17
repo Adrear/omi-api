@@ -1,0 +1,428 @@
+[
+  {
+    "№": 1,
+    "Flag": "",
+    "Country": "United States",
+    "Code": "US"
+  },
+  {
+    "№": 2,
+    "Flag": "",
+    "Country": "Canada",
+    "Code": "CA"
+  },
+  {
+    "№": 3,
+    "Flag": "",
+    "Country": "Unt. Kingdom",
+    "Code": "UK"
+  },
+  {
+    "№": 4,
+    "Flag": "",
+    "Country": "France",
+    "Code": "FR"
+  },
+  {
+    "№": 5,
+    "Flag": "",
+    "Country": "Germany",
+    "Code": "DE"
+  },
+  {
+    "№": 6,
+    "Flag": "",
+    "Country": "Italy",
+    "Code": "IT"
+  },
+  {
+    "№": 7,
+    "Flag": "",
+    "Country": "Spain",
+    "Code": "ES"
+  },
+  {
+    "№": 8,
+    "Flag": "",
+    "Country": "Albania",
+    "Code": "AL"
+  },
+  {
+    "№": 9,
+    "Flag": "",
+    "Country": "Argentina",
+    "Code": "AR"
+  },
+  {
+    "№": 10,
+    "Flag": "",
+    "Country": "Australia",
+    "Code": "AU"
+  },
+  {
+    "№": 11,
+    "Flag": "",
+    "Country": "Austria",
+    "Code": "AT"
+  },
+  {
+    "№": 12,
+    "Flag": "",
+    "Country": "Bangladesh",
+    "Code": "BD"
+  },
+  {
+    "№": 13,
+    "Flag": "",
+    "Country": "Bos. and Herz.",
+    "Code": "BA"
+  },
+  {
+    "№": 14,
+    "Flag": "",
+    "Country": "Brazil",
+    "Code": "BR"
+  },
+  {
+    "№": 15,
+    "Flag": "",
+    "Country": "Bulgaria",
+    "Code": "BG"
+  },
+  {
+    "№": 16,
+    "Flag": "",
+    "Country": "Cambodia",
+    "Code": "KH"
+  },
+  {
+    "№": 17,
+    "Flag": "",
+    "Country": "Chile",
+    "Code": "CL"
+  },
+  {
+    "№": 18,
+    "Flag": "",
+    "Country": "Colombia",
+    "Code": "CO"
+  },
+  {
+    "№": 19,
+    "Flag": "",
+    "Country": "Croatia",
+    "Code": "HR"
+  },
+  {
+    "№": 20,
+    "Flag": "",
+    "Country": "Cyprus",
+    "Code": "CY"
+  },
+  {
+    "№": 21,
+    "Flag": "",
+    "Country": "Czech Republic",
+    "Code": "CZ"
+  },
+  {
+    "№": 22,
+    "Flag": "",
+    "Country": "Denmark",
+    "Code": "DK"
+  },
+  {
+    "№": 23,
+    "Flag": "",
+    "Country": "Dominicana",
+    "Code": "DO"
+  },
+  {
+    "№": 24,
+    "Flag": "",
+    "Country": "Egypt",
+    "Code": "EG"
+  },
+  {
+    "№": 25,
+    "Flag": "",
+    "Country": "Estonia",
+    "Code": "EE"
+  },
+  {
+    "№": 26,
+    "Flag": "",
+    "Country": "Finland",
+    "Code": "FI"
+  },
+  {
+    "№": 27,
+    "Flag": "",
+    "Country": "Georgia",
+    "Code": "GE"
+  },
+  {
+    "№": 28,
+    "Flag": "",
+    "Country": "Ghana (Virtual)",
+    "Code": "GH"
+  },
+  {
+    "№": 29,
+    "Flag": "",
+    "Country": "Gibraltar",
+    "Code": "GI"
+  },
+  {
+    "№": 30,
+    "Flag": "",
+    "Country": "Greece",
+    "Code": "GR"
+  },
+  {
+    "№": 31,
+    "Flag": "",
+    "Country": "Hong Kong",
+    "Code": "HK"
+  },
+  {
+    "№": 32,
+    "Flag": "",
+    "Country": "Hungary",
+    "Code": "HU"
+  },
+  {
+    "№": 33,
+    "Flag": "",
+    "Country": "India",
+    "Code": "IN"
+  },
+  {
+    "№": 34,
+    "Flag": "",
+    "Country": "Japan",
+    "Code": "JP"
+  },
+  {
+    "№": 35,
+    "Flag": "",
+    "Country": "Kyrgyzstan (Virtual)",
+    "Code": "KG"
+  },
+  {
+    "№": 36,
+    "Flag": "",
+    "Country": "Malta",
+    "Code": "MT"
+  },
+  {
+    "№": 37,
+    "Flag": "",
+    "Country": "Norway",
+    "Code": "NO"
+  },
+  {
+    "№": 38,
+    "Flag": "",
+    "Country": "Pakistan (Virtual)",
+    "Code": "PK"
+  },
+  {
+    "№": 39,
+    "Flag": "",
+    "Country": "Singapore",
+    "Code": "SG"
+  },
+  {
+    "№": 40,
+    "Flag": "",
+    "Country": "Tanzania",
+    "Code": "TZ"
+  },
+  {
+    "№": 41,
+    "Flag": "",
+    "Country": "Uzbekistan (Virtual)",
+    "Code": "UZ"
+  },
+  {
+    "№": 42,
+    "Flag": "",
+    "Country": "Indonesia",
+    "Code": "ID"
+  },
+  {
+    "№": 43,
+    "Flag": "",
+    "Country": "Ireland",
+    "Code": "IE"
+  },
+  {
+    "№": 44,
+    "Flag": "",
+    "Country": "Israel",
+    "Code": "IL"
+  },
+  {
+    "№": 45,
+    "Flag": "",
+    "Country": "Kazakhstan",
+    "Code": "KZ"
+  },
+  {
+    "№": 46,
+    "Flag": "",
+    "Country": "Kenya",
+    "Code": "KE"
+  },
+  {
+    "№": 47,
+    "Flag": "",
+    "Country": "Laos",
+    "Code": "LA"
+  },
+  {
+    "№": 48,
+    "Flag": "",
+    "Country": "Latvia",
+    "Code": "LV"
+  },
+  {
+    "№": 49,
+    "Flag": "",
+    "Country": "Lithuania",
+    "Code": "LT"
+  },
+  {
+    "№": 50,
+    "Flag": "",
+    "Country": "Macedonia",
+    "Code": "MK"
+  },
+  {
+    "№": 51,
+    "Flag": "",
+    "Country": "Malaysia",
+    "Code": "MY"
+  },
+  {
+    "№": 52,
+    "Flag": "",
+    "Country": "Mexico",
+    "Code": "MX"
+  },
+  {
+    "№": 53,
+    "Flag": "",
+    "Country": "Morocco",
+    "Code": "MA"
+  },
+  {
+    "№": 54,
+    "Flag": "",
+    "Country": "Netherlands",
+    "Code": "NL"
+  },
+  {
+    "№": 55,
+    "Flag": "",
+    "Country": "New Zealand",
+    "Code": "NZ"
+  },
+  {
+    "№": 56,
+    "Flag": "",
+    "Country": "Nigeria",
+    "Code": "NG"
+  },
+  {
+    "№": 57,
+    "Flag": "",
+    "Country": "Paraguay",
+    "Code": "PY"
+  },
+  {
+    "№": 58,
+    "Flag": "",
+    "Country": "Philippines",
+    "Code": "PH"
+  },
+  {
+    "№": 59,
+    "Flag": "",
+    "Country": "Poland",
+    "Code": "PL"
+  },
+  {
+    "№": 60,
+    "Flag": "",
+    "Country": "Portugal",
+    "Code": "PT"
+  },
+  {
+    "№": 61,
+    "Flag": "",
+    "Country": "Romania",
+    "Code": "RO"
+  },
+  {
+    "№": 62,
+    "Flag": "",
+    "Country": "Russian Federation",
+    "Code": "RU"
+  },
+  {
+    "№": 63,
+    "Flag": "",
+    "Country": "Serbia",
+    "Code": "RS"
+  },
+  {
+    "№": 64,
+    "Flag": "",
+    "Country": "Slovakia",
+    "Code": "SK"
+  },
+  {
+    "№": 65,
+    "Flag": "",
+    "Country": "Slovenia",
+    "Code": "SI"
+  },
+  {
+    "№": 66,
+    "Flag": "",
+    "Country": "South Africa",
+    "Code": "ZA"
+  },
+  {
+    "№": 67,
+    "Flag": "",
+    "Country": "Sweden",
+    "Code": "SE"
+  },
+  {
+    "№": 68,
+    "Flag": "",
+    "Country": "Thailand",
+    "Code": "TH"
+  },
+  {
+    "№": 69,
+    "Flag": "",
+    "Country": "Turkey",
+    "Code": "TR"
+  },
+  {
+    "№": 70,
+    "Flag": "",
+    "Country": "Ukraine",
+    "Code": "UA"
+  },
+  {
+    "№": 71,
+    "Flag": "",
+    "Country": "Vietnam",
+    "Code": "VN"
+  }
+]
