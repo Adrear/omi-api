@@ -4,9 +4,10 @@ import {CollectionReference} from '@google-cloud/firestore';
 import {firstValueFrom} from 'rxjs';
 import {FiveSimCountryDocument, SmsActivateCountryDocument, CountryDocument, SmshubCountryDocument, SimsmsCountryDocument, SmspvaCountryDocument} from './documents/index.document';
 import {ConfigService} from "@nestjs/config";
-import dataSmshub from './smshub.json'
-import dataSimsms from './simsms.json'
-import dataSmspva from './smspva.json'
+import dataSmshub from './smshub.json';
+import dataSimsms from './simsms.json';
+import dataSmspva from './smspva.json';
+import dataMaster from './countries.json';
 
 @Injectable()
 export class CountriesService {
@@ -36,7 +37,10 @@ export class CountriesService {
 
     async updateCountries(source: string): Promise<{ message: string }> {
         try {
-            if (source === 'smshub') {
+            if (!source) {
+                await this.updateMasterCountries();
+                return { message: 'Countries updated successfully' };
+            } else if (source === 'smshub') {
                 await this.addSmshubCountries();
                 return { message: 'Countries updated successfully' };
             } else if (source === 'simsms') {
@@ -67,6 +71,35 @@ export class CountriesService {
             return `https://5sim.net/v1/guest/countries`;
         }
         throw new Error('Unknown data source');
+    }
+
+    private async updateMasterCountries() {
+        const batch = this.countriesCollection.firestore.batch();
+        for (const country of dataMaster) {
+            const docRef = this.countriesCollection.doc(country.id);
+            const countryData: any = {
+                id: country.id,
+                name: country.name,
+                code: country.code,
+                flag: country.flag,
+                region: JSON.parse(country.region),
+                region_wb: country.region_wb,
+                id_activate: country.id_activate?.toString(),
+                id_5sim: country.id_5sim,
+                id_smshub: country.id_smshub?.toString(),
+                id_simsms: country.id_simsms,
+                id_smspva: country.id_smspva,
+                not_used: country.not_used,
+            };
+            Object.keys(countryData).forEach(key => {
+                if (countryData[key] === undefined || countryData[key] === null || countryData[key] === "") {
+                    delete countryData[key];
+                }
+            });
+
+            batch.set(docRef, countryData);
+        }
+        await batch.commit();
     }
 
     public async addCountries(data: any, source: string): Promise<void> {

@@ -1,11 +1,25 @@
-export class SmshubServiceDocument {
-    static collectionName = 'smshub-services';
+import { Timestamp } from '@google-cloud/firestore';
 
-    code: string;
-    name: string;
+export class SmshubVerificationDocument {
+    static collectionName = 'smshub-verifications';
 
-    constructor(code: string, name: string) {
-        this.code = code;
-        this.name = name;
+    date!: Timestamp;
+    source!: string;
+    service_code!: string;
+    country!: string;
+    price_info!: object;
+
+    constructor(
+        date: Timestamp,
+        source: string,
+        service_code: string,
+        country: string,
+        price: object
+    ) {
+        this.date = date;
+        this.source = source;
+        this.service_code = service_code;
+        this.country = country;
+        this.price_info = price;
     }
 }

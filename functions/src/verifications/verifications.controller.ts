@@ -6,8 +6,8 @@ export class VerificationsController {
     constructor(private readonly verificationsService: VerificationsService) {}
 
     @Get()
-    async getAllVerifications(@Query('source') source: string) {
-        return this.verificationsService.getAllVerifications(source);
+    async getAllVerifications(@Query() query: { source?: string, date?: string }) {
+        return this.verificationsService.getAllVerifications(query);
     }
 
     @Get('update')

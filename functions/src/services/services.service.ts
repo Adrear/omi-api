@@ -8,6 +8,7 @@ import dataSmshub from "./smshub.json";
 import data5sim from "./5sim.json";
 import dataSimsms from "./simsms.json";
 import dataSmspva from "./smspva.json";
+import dataMaster from "./services.json";
 
 @Injectable()
 export class ServicesService {
@@ -37,7 +38,10 @@ export class ServicesService {
 
     async updateServices(source: string): Promise<{ message: string }> {
         try {
-            if (source === 'smshub') {
+            if (!source) {
+                await this.updateMasterServices();
+                return { message: 'Services updated successfully' };
+            } else if (source === 'smshub') {
                 await this.addSmshubServices();
                 return { message: 'Services updated successfully' };
             } else if (source === 'simsms') {
@@ -63,6 +67,37 @@ export class ServicesService {
             this.logger.error(`Failed to update services: ${error.message}`);
             throw new Error('Failed to update services');
         }
+    }
+
+    private async updateMasterServices() {
+        const batch = this.servicesCollection.firestore.batch();
+        for (const service of dataMaster) {
+            const docRef = this.servicesCollection.doc(service.id);
+            const serviceData: any = {
+                id: service.id,
+                name: service.name,
+                logo: service.logo,
+                category: service.category,
+                id_activate: service.id_activate,
+                name_activate: service.name_activate,
+                id_smshub: service.id_smshub,
+                name_smshub: service.name_smshub,
+                id_5sim: service.id_5sim,
+                name_5sim: service.name_5sim,
+                id_simsms: service.id_simsms,
+                name_simsms: service.name_simsms,
+                id_smspva: service.id_smspva,
+                name_smspva: service.name_smspva,
+            };
+            Object.keys(serviceData).forEach(key => {
+                if (serviceData[key] === undefined || serviceData[key] === null || serviceData[key] === "") {
+                    delete serviceData[key];
+                }
+            });
+
+            batch.set(docRef, serviceData);
+        }
+        await batch.commit();
     }
 
     private getApiUrl(source: string): string {
