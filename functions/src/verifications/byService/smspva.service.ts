@@ -9,6 +9,8 @@ import { ConfigService } from '@nestjs/config';
 import dayjs from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 import timeout from '../../helpers/timeout';
+import getStartAndFinishDates from "../../helpers/getStartAndFinishDate";
+import * as _ from "lodash";
 dayjs.extend(customParseFormat);
 
 interface PriceData {
@@ -35,6 +37,27 @@ export class SmspvaService {
         private readonly httpService: HttpService,
         private readonly configService: ConfigService
     ) {}
+
+    public async getVerificationsByDayAndService ({ day, service_code }: { day: string, service_code: string }) {
+        const { startDate, finishDate} = getStartAndFinishDates(day)
+        const verificationsSnapshot = await this.smspvaVerificationsCollection
+            .where('date', '>=', startDate)
+            .where('date', '<=', finishDate)
+            .where('service_code', '==', service_code)
+            .get();
+        const smspvaDocs = verificationsSnapshot.docs.map(doc => {
+            return {
+                day,
+                service_code,
+                country: doc.data().country,
+                price: doc.data().price,
+                serviceDescription: doc.data().serviceDescription,
+                source: doc.data().source,
+                count: doc.data().count_info[`Total_${doc.data().country}`]
+            }
+        })
+        return _.uniqBy(smspvaDocs, 'country');
+    }
     public async addSmspvaVerifications() {
         const batchLimit = 100;
         let batch = this.smspvaVerificationsCollection.firestore.batch();

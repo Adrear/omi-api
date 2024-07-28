@@ -8,8 +8,10 @@ import { ConfigService } from '@nestjs/config';
 import dayjs from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 import timeout from '../../helpers/timeout';
+import getStartAndFinishDates from "../../helpers/getStartAndFinishDate";
+import { calculateAveragePriceAndCountFiveSim } from "../../helpers/calculateAveragePriceAndCount";
+import * as _ from "lodash";
 dayjs.extend(customParseFormat);
-
 @Injectable()
 export class FiveSimService {
     private logger: Logger = new Logger(FiveSimService.name);
@@ -21,16 +23,44 @@ export class FiveSimService {
         private readonly httpService: HttpService,
         private readonly configService: ConfigService
     ) {}
-    public async addFiveSimVerifications() {
+    public async getVerificationsByDayAndService ({ day, service_code }: { day: string, service_code: string }) {
+        const { startDate, finishDate} = getStartAndFinishDates(day)
+        const verificationsSnapshot = await this.fiveSimVerificationsCollection
+            .where('date', '>=', startDate)
+            .where('date', '<=', finishDate)
+            .where('service_code', '==', service_code)
+            .get();
+        const smspvaDocs = verificationsSnapshot.docs.map(doc => {
+            const { price, count } = calculateAveragePriceAndCountFiveSim(doc.data().price_info)
+            return {
+                day,
+                service_code,
+                price,
+                count,
+                country: doc.data().country,
+                source: doc.data().source
+            }
+        })
+        return _.uniqBy(smspvaDocs, 'country');
+    }
+    public async addFiveSimVerifications(part?: string) {
         const batchLimit = 100; // Firestore має ліміт на 500 операцій в одному батчі
         let batch = this.fiveSimVerificationsCollection.firestore.batch();
         let batchCounter = 0;
 
-        const servicesSnapshot = await this.servicesCollection
+        let query = this.servicesCollection
             .orderBy('id_5sim')
-            .where('id_5sim', '>=', 'hepsiburadacom')
-            .where('id_5sim', '<=', 'gx')
-            .get();
+        if (part) {
+            const lastVisible = (part === '1')
+                ? '163som'
+                : (part === '2')
+                    ? 'gmx'
+                    : 'poshmark'
+            query = query
+                .limit(182)
+                .startAt(lastVisible)
+        }
+        const servicesSnapshot = await query.get();
 
         for (const doc of servicesSnapshot.docs) {
             const url = `https://5sim.net/v1/guest/prices?product=${doc.data().id_5sim}`;
@@ -40,7 +70,7 @@ export class FiveSimService {
                 },
             }));
 
-            await timeout(6000);
+            await timeout(1000);
             this.logger.debug(`Fetching data for service: ${doc.id}`);
 
             if (response && response.data) {

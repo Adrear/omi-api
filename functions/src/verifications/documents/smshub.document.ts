@@ -1,5 +1,7 @@
 import { Timestamp } from '@google-cloud/firestore';
-
+interface PriceInfo {
+    [price: string]: number;
+}
 export class SmshubVerificationDocument {
     static collectionName = 'smshub-verifications';
 
@@ -7,14 +9,14 @@ export class SmshubVerificationDocument {
     source!: string;
     service_code!: string;
     country!: string;
-    price_info!: object;
+    price_info!: PriceInfo;
 
     constructor(
         date: Timestamp,
         source: string,
         service_code: string,
         country: string,
-        price: object
+        price: PriceInfo
     ) {
         this.date = date;
         this.source = source;

@@ -1,11 +1,13 @@
 import {Timestamp} from "@google-cloud/firestore";
-
+interface CountInfo {
+    [key: string]: number;
+}
 export class SmspvaVerificationDocument {
     static collectionName = 'smspva-verifications';
 
     country: string;
     date: Timestamp;
-    count_info: object;
+    count_info: CountInfo;
     service_code: string;
     source: string;
     price: number;
@@ -14,7 +16,7 @@ export class SmspvaVerificationDocument {
     constructor(
         country: string,
         date: Timestamp,
-        count_info: object,
+        count_info: CountInfo,
         service_code: string,
         source: string,
         price: number,

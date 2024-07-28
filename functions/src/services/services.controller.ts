@@ -6,8 +6,8 @@ export class ServicesController {
     constructor(private readonly servicesService: ServicesService) {}
 
     @Get()
-    async getAllServices() {
-        return this.servicesService.getAllServices();
+    async getAllServices(@Query() query: { lastVisible: string, itemsPerPage: number }) {
+        return this.servicesService.getAllServices(query);
     }
 
     @Post('add')

@@ -7,17 +7,31 @@ import { SmsActivateService } from './byService/sms-activate.service';
 import { SmspvaService } from './byService/smspva.service';
 import dayjs from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
+import {ServiceDocument} from "../services/documents/service.document";
+import * as _ from 'lodash';
+import {CountryDocument} from "../countries/documents/country.document";
 dayjs.extend(customParseFormat);
 interface GetAllVerificationsParams {
     source?: string;
     date?: string;
 }
+
+interface VerificationEntry {
+    priceUSD: number;
+    count: number;
+}
+
+
 @Injectable()
 export class VerificationsService {
     private logger: Logger = new Logger(VerificationsService.name);
     constructor(
         @Inject(VerificationDocument.collectionName)
         private verificationsCollection: CollectionReference<VerificationDocument>,
+        @Inject(ServiceDocument.collectionName)
+        private servicesCollection: CollectionReference<ServiceDocument>,
+        @Inject(CountryDocument.collectionName)
+        private countriesCollection: CollectionReference<CountryDocument>,
         private readonly smshubService: SmshubService,
         private readonly fiveSimService: FiveSimService,
         private readonly smsActivateService: SmsActivateService,
@@ -54,7 +68,76 @@ export class VerificationsService {
         return snapshot.docs.length;
     }
 
-    async updateVerifications(source: string): Promise<{ message: string }> {
+    async createVerifications(day: string) {
+        try {
+            let batch = this.verificationsCollection.firestore.batch();
+            const servicesSnapshot = await this.servicesCollection.get();
+
+            const promises = servicesSnapshot.docs.map(async (serviceDoc) => {
+                this.logger.log(serviceDoc.id);
+
+                const [smsActivateDocs, fiveSimDocs, smspvaDocs, smshubDocs] = await Promise.all([
+                    serviceDoc.data().id_activate ? this.smsActivateService.getVerificationsByDayAndService({
+                        day: day,
+                        service_code: serviceDoc.data().id_activate
+                    }) : Promise.resolve([]),
+                    serviceDoc.data().id_5sim ? this.fiveSimService.getVerificationsByDayAndService({
+                        day: day,
+                        service_code: serviceDoc.data().id_5sim
+                    }) : Promise.resolve([]),
+                    serviceDoc.data().id_smspva ? this.smspvaService.getVerificationsByDayAndService({
+                        day: day,
+                        service_code: serviceDoc.data().id_smspva
+                    }) : Promise.resolve([]),
+                    serviceDoc.data().id_smshub ? this.smshubService.getVerificationsByDayAndService({
+                        day: day,
+                        service_code: serviceDoc.data().id_smshub
+                    }) : Promise.resolve([])
+                ]);
+
+                const countriesSnapshot = await this.countriesCollection.get();
+                const verification: { [countryId: string]: VerificationEntry } = {};
+
+                for (const countryDoc of countriesSnapshot.docs) {
+                    const smsActivateDoc = smsActivateDocs.find(el => el.country === countryDoc.data().id_activate);
+                    const fiveSimDoc = fiveSimDocs.find(el => el.country === countryDoc.data().id_5sim);
+                    const smspvaDoc = smspvaDocs.find(el => el.country === countryDoc.data().id_smspva);
+                    const smshubDoc = smshubDocs.find(el => el.country === countryDoc.data().id_smshub);
+
+                    const totalCount = (smsActivateDoc?.count || 0) + (fiveSimDoc?.count || 0) + (smspvaDoc?.count || 0) + (smshubDoc?.count || 0);
+
+                    if (totalCount > 0) {
+                        verification[countryDoc.id] = {
+                            priceUSD: (
+                                ((smsActivateDoc?.price || 0) / 100 * (smsActivateDoc?.count || 0)) +
+                                ((fiveSimDoc?.price || 0) / 100 * (fiveSimDoc?.count || 0)) +
+                                ((smspvaDoc?.price || 0) * (smspvaDoc?.count || 0)) +
+                                ((smshubDoc?.price || 0) * (smshubDoc?.count || 0))
+                            ) / totalCount,
+                            count: totalCount
+                        };
+                    }
+                }
+
+                const verificationData = {
+                    day: day,
+                    createdAt: new Date(),
+                    serviceID: serviceDoc.id,
+                    ...verification
+                };
+
+                const docRef = this.verificationsCollection.doc(`${day}_${serviceDoc.id}`);
+                batch.set(docRef, verificationData);
+            });
+            await Promise.all(promises);
+            await batch.commit();
+
+        } catch (error) {
+            this.logger.error('Error in createVerifications:', error);
+        }
+    }
+
+    async updateVerifications(source: string, part?: string): Promise<{ message: string }> {
         try {
             switch (source) {
                 case 'sms-activate':
@@ -63,11 +146,11 @@ export class VerificationsService {
                     break;
                 case '5sim':
                     this.logger.debug('Updating 5sim verifications...');
-                    await this.fiveSimService.addFiveSimVerifications();
+                    await this.fiveSimService.addFiveSimVerifications(part);
                     break;
                 case 'smshub':
                     this.logger.debug('Updating SMSHub verifications...');
-                    await this.smshubService.addSmshubVerifications();
+                    await this.smshubService.addSmshubVerifications(part);
                     break;
                 case 'smspva':
                     this.logger.debug('Updating SMSPVA verifications...');
@@ -78,7 +161,8 @@ export class VerificationsService {
                     // await this.addSimsmsServices();
                     break;
                 case '':
-                    this.logger.warn('Source is empty, not ready to update verifications.');
+                    this.logger.warn('Create verifications...');
+                    // await this.createVerifications();
                     return { message: 'not ready' };
                 default:
                     this.logger.warn(`Unknown source: ${source}`);

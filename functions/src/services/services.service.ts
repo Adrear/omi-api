@@ -31,9 +31,26 @@ export class ServicesService {
         private readonly configService: ConfigService
     ) {}
 
-    async getAllServices() {
-        const snapshot = await this.servicesCollection.get();
-        return snapshot.docs.map(doc => doc.data());
+    async getAllServices({ lastVisible, itemsPerPage = 20 }: { lastVisible?: string | null, itemsPerPage?: number }) {
+        const totalSnapshot = await this.servicesCollection.get();
+        const totalDocuments = totalSnapshot.size;
+        let query = this.servicesCollection
+            .orderBy('id')
+            .limit(itemsPerPage);
+
+        if (lastVisible) {
+            query = query.startAfter(lastVisible);
+        }
+        const snapshot = await query.get();
+        const services = snapshot.docs.map(doc => doc.data());
+        const lastVisibleDoc = snapshot.docs[snapshot.docs.length - 1];
+        return {
+            data: services,
+            meta: {
+                total: totalDocuments,
+                lastVisible: lastVisibleDoc ? lastVisibleDoc.id : null,
+            }
+        };
     }
 
     async updateServices(source: string): Promise<{ message: string }> {

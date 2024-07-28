@@ -1,14 +1,12 @@
 {
   "name": "functions",
   "scripts": {
-    "build": "tsc",
-    "build:watch": "tsc --watch",
+    "build": "nest build",
     "serve:firebase": "npm run build && firebase emulators:start --only functions",
     "shell": "npm run build && firebase functions:shell",
     "deploy": "firebase deploy --only functions",
     "logs": "firebase functions:log",
-    "serve": "tsc-watch --project tsconfig.json --onSuccess 'node dist/main.js'",
-    "start": "ts-node -r tsconfig-paths/register src/main.ts"
+    "start": "nest start --watch"
   },
   "engines": {
     "node": "20"
@@ -23,6 +21,7 @@
     "@nestjs/platform-express": "^10.3.10",
     "@types/lodash": "^4.17.7",
     "axios": "^1.7.2",
+    "cors": "^2.8.5",
     "dayjs": "^1.11.11",
     "dotenv": "^16.4.5",
     "firebase-admin": "^12.1.0",

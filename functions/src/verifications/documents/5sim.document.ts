@@ -1,5 +1,12 @@
 import { Timestamp } from '@google-cloud/firestore';
 
+interface ProviderInfo {
+    cost: number;
+    count: number;
+}
+interface PriceInfo {
+    [provider: string]: ProviderInfo;
+}
 export class FiveSimVerificationDocument {
     static collectionName = '5sim-verifications';
 
@@ -7,14 +14,14 @@ export class FiveSimVerificationDocument {
     source!: string;
     service_code!: string;
     country!: string;
-    price_info!: object;
+    price_info!: PriceInfo;
 
     constructor(
         date: Timestamp,
         source: string,
         service_code: string,
         country: string,
-        price: object
+        price: PriceInfo
     ) {
         this.date = date;
         this.source = source;

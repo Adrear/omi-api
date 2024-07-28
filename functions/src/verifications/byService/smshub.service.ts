@@ -8,6 +8,8 @@ import { ConfigService } from '@nestjs/config';
 import dayjs from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 import timeout from '../../helpers/timeout';
+import getStartAndFinishDates from "../../helpers/getStartAndFinishDate";
+import { calculateAveragePriceAndCountSmshub } from "../../helpers/calculateAveragePriceAndCount";
 import * as _ from 'lodash';
 dayjs.extend(customParseFormat);
 
@@ -24,22 +26,51 @@ export class SmshubService {
         private readonly httpService: HttpService,
         private readonly configService: ConfigService
     ) {}
+    public async getVerificationsByDayAndService ({ day, service_code }: { day: string, service_code: string }) {
+        const { startDate, finishDate} = getStartAndFinishDates(day)
+        const verificationsSnapshot = await this.smshubVerificationsCollection
+            .where('date', '>=', startDate)
+            .where('date', '<=', finishDate)
+            .where('service_code', '==', service_code)
+            .get();
+        const smshubDocs = verificationsSnapshot.docs.map(doc => {
+            const { price, count } = calculateAveragePriceAndCountSmshub(doc.data().price_info)
+            return {
+                day,
+                service_code,
+                price,
+                count,
+                country: doc.data().country,
+                source: doc.data().source
+            }
+        })
+        return _.uniqBy(smshubDocs, 'country');
+    }
 
-    public async addSmshubVerifications(): Promise<void> {
+    public async addSmshubVerifications(part?: string): Promise<void> {
         const batchLimit = 100;
         let batch = this.smshubVerificationsCollection.firestore.batch();
         let batchCounter = 0;
 
-        const servicesSnapshot = await this.servicesCollection
+        let query = this.servicesCollection
             .orderBy('id_smshub')
-            .where('__name__', '>=', 'mv')
-            .get();
+        if (part) {
+            const lastVisible = (part === '1')
+                ? 'aa'
+                : (part === '2')
+                    ? 'dp'
+                    : 'op'
+            query = query
+                .limit(182)
+                .startAt(lastVisible)
+        }
+        const servicesSnapshot = await query.get();
 
         for (const doc of servicesSnapshot.docs) {
             const url = `https://smshub.org/stubs/handler_api.php?api_key=${this.configService.get<string>('app.api_key_smshub')}&action=getPrices&service=${doc.data().id_smshub}&currency=840`;
             const response = await firstValueFrom(this.httpService.get(url));
 
-            await timeout(6000);
+            await timeout(1000);
             this.logger.debug(`Fetching data for service: ${doc.id}`);
 
             if (response && response.data) {
