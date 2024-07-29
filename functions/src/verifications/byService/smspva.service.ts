@@ -157,7 +157,7 @@ export class SmspvaService {
         }
 
         if (batchCounter > 0) {
-            await batch.commit(); // Комміт останнього батчу
+            await batch.commit();
         }
     }
 }

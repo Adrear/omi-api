@@ -32,8 +32,8 @@ export class ServicesService {
     ) {}
 
     async getAllServices({ lastVisible, itemsPerPage = 20 }: { lastVisible?: string | null, itemsPerPage?: number }) {
-        const totalSnapshot = await this.servicesCollection.get();
-        const totalDocuments = totalSnapshot.size;
+        // const totalSnapshot = await this.servicesCollection.get();
+        // const totalDocuments = totalSnapshot.size;
         let query = this.servicesCollection
             .orderBy('id')
             .limit(itemsPerPage);
@@ -47,7 +47,7 @@ export class ServicesService {
         return {
             data: services,
             meta: {
-                total: totalDocuments,
+                // total: totalDocuments,
                 lastVisible: lastVisibleDoc ? lastVisibleDoc.id : null,
             }
         };

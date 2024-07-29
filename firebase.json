@@ -2,6 +2,7 @@
   "functions": [
     {
       "source": "functions",
+      "defaultRegion": "europe-west1",
       "codebase": "default",
       "ignore": [
         "node_modules",

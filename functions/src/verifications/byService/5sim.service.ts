@@ -44,7 +44,7 @@ export class FiveSimService {
         return _.uniqBy(smspvaDocs, 'country');
     }
     public async addFiveSimVerifications(part?: string) {
-        const batchLimit = 100; // Firestore має ліміт на 500 операцій в одному батчі
+        const batchLimit = 100;
         let batch = this.fiveSimVerificationsCollection.firestore.batch();
         let batchCounter = 0;
 
@@ -105,7 +105,7 @@ export class FiveSimService {
         }
 
         if (batchCounter > 0) {
-            await batch.commit(); // Комміт останнього батчу
+            await batch.commit();
         }
     }
 }
