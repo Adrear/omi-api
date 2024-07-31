@@ -35,7 +35,7 @@ export class ServicesService {
         // const totalSnapshot = await this.servicesCollection.get();
         // const totalDocuments = totalSnapshot.size;
         let query = this.servicesCollection
-            .orderBy('id')
+            .orderBy('totalServiceCount', 'desc')
             .limit(itemsPerPage);
 
         if (lastVisible) {

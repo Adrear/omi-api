@@ -30,9 +30,27 @@ export class CountriesService {
         private readonly configService: ConfigService
     ) {}
 
-    async getAllCountries() {
-        const snapshot = await this.countriesCollection.get();
-        return snapshot.docs.map(doc => doc.data());
+    async getAllCountries({ lastVisible, itemsPerPage = 20 }: { lastVisible?: string | null, itemsPerPage?: number }) {
+        // const totalSnapshot = await this.servicesCollection.get();
+        // const totalDocuments = totalSnapshot.size;
+        let query = this.countriesCollection
+            // .orderBy('totalCountryCount', 'desc')
+            .orderBy('id')
+            .limit(itemsPerPage);
+
+        if (lastVisible) {
+            query = query.startAfter(lastVisible);
+        }
+        const snapshot = await query.get();
+        const countries = snapshot.docs.map(doc => doc.data());
+        const lastVisibleDoc = snapshot.docs[snapshot.docs.length - 1];
+        return {
+            data: countries,
+            meta: {
+                // total: totalDocuments,
+                lastVisible: lastVisibleDoc ? lastVisibleDoc.id : null,
+            }
+        };
     }
 
     async updateCountries(source: string): Promise<{ message: string }> {

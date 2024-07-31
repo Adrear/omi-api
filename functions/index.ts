@@ -14,13 +14,11 @@ const createNestServer = async (expressInstance: express.Application) => {
     app.enableCors();
     await app.init();
 };
-let verificationsService: VerificationsService;
 const initializeService = async () => {
-    if (!verificationsService) {
-        const app = await NestFactory.createApplicationContext(AppModule);
-        verificationsService = app.get(VerificationsService);
-    }
+    const app = await NestFactory.createApplicationContext(AppModule);
+    return app.get(VerificationsService);
 };
+
 const executeVerifications = async (tasks: Promise<void>[], part: string) => {
     try {
         await Promise.all(tasks.map(task => task.catch(err => console.error(`${part} error: ${err.message}`))));
@@ -39,10 +37,10 @@ const TIMEZONE = 'Europe/Kyiv';
 export const scheduledFunctionFirstPart = functions.region('europe-west1')
     .runWith({ timeoutSeconds: TIMEOUT_SECONDS })
     .pubsub
-    .schedule('0 21 * * *')
+    .schedule('30 22 * * *')
     .timeZone(TIMEZONE)
     .onRun(async (context) => {
-        await initializeService();
+        const verificationsService = await initializeService();
         await executeVerifications([
             verificationsService.updateVerifications('sms-activate').then(() => undefined),
             verificationsService.updateVerifications('5sim', '1').then(() => undefined),
@@ -54,10 +52,10 @@ export const scheduledFunctionFirstPart = functions.region('europe-west1')
 export const scheduledFunctionSecondPart = functions.region('europe-west1')
     .runWith({ timeoutSeconds: TIMEOUT_SECONDS })
     .pubsub
-    .schedule('15 21 * * *')
+    .schedule('45 22 * * *')
     .timeZone(TIMEZONE)
     .onRun(async (context) => {
-        await initializeService();
+        const verificationsService = await initializeService();
         await executeVerifications([
             verificationsService.updateVerifications('5sim', '2').then(() => undefined),
             verificationsService.updateVerifications('smshub', '2').then(() => undefined),
@@ -67,10 +65,10 @@ export const scheduledFunctionSecondPart = functions.region('europe-west1')
 export const scheduledFunctionThirdPart = functions.region('europe-west1')
     .runWith({ timeoutSeconds: TIMEOUT_SECONDS })
     .pubsub
-    .schedule('30 21 * * *')
+    .schedule('* 23 * * *')
     .timeZone(TIMEZONE)
     .onRun(async (context) => {
-        await initializeService();
+        const verificationsService = await initializeService();
         await executeVerifications([
             verificationsService.updateVerifications('5sim', '3').then(() => undefined),
             verificationsService.updateVerifications('smshub', '3').then(() => undefined),

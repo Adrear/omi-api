@@ -6,8 +6,10 @@ export class CountriesController {
     constructor(private readonly countriesService: CountriesService) {}
 
     @Get()
-    async getAllCountries() {
-        return this.countriesService.getAllCountries();
+    async getAllCountries(@Query() query: { lastVisible: string, itemsPerPage: string }) {
+        const { lastVisible, itemsPerPage } = query;
+        const itemsPerPageNumber = parseInt(itemsPerPage, 10);
+        return this.countriesService.getAllCountries({ lastVisible, itemsPerPage: itemsPerPageNumber });
     }
 
     @Post('add')

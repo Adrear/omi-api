@@ -97,6 +97,7 @@ export class VerificationsService {
 
                 const countriesSnapshot = await this.countriesCollection.get();
                 const verification: { [countryId: string]: VerificationEntry } = {};
+                let totalServiceCount = 0; // Змінна для зберігання загальної кількості верифікацій для сервісу
 
                 for (const countryDoc of countriesSnapshot.docs) {
                     const smsActivateDoc = smsActivateDocs.find(el => el.country === countryDoc.data().id_activate);
@@ -116,24 +117,80 @@ export class VerificationsService {
                             ) / totalCount,
                             count: totalCount
                         };
+                        totalServiceCount += totalCount;
                     }
                 }
 
                 const verificationData = {
                     day: day,
-                    createdAt: new Date(),
+                    createdAt: Timestamp.now(),
                     serviceID: serviceDoc.id,
+                    totalServiceCount,
                     ...verification
                 };
 
                 const docRef = this.verificationsCollection.doc(`${day}_${serviceDoc.id}`);
                 batch.set(docRef, verificationData);
+                await this.servicesCollection.doc(serviceDoc.id).update({ totalServiceCount });
             });
             await Promise.all(promises);
             await batch.commit();
 
         } catch (error) {
             this.logger.error('Error in createVerifications:', error);
+        }
+    }
+
+    async getLastVerificationsByService(serviceID: string) {
+        const servicesSnapshot = await this.verificationsCollection
+            .where('serviceID', '==', serviceID)
+            .orderBy('day')
+            .limit(1)
+            .get();
+        return servicesSnapshot.docs.map(el => el.data())[0];
+    }
+
+    private getYesterdayDate(): string {
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        const year = yesterday.getFullYear();
+        const month = (yesterday.getMonth() + 1).toString().padStart(2, '0');
+        const day = yesterday.getDate().toString().padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+    async getLastVerificationsByCountry(countryID: string) {
+        try {
+            const day = this.getYesterdayDate();
+
+            // Отримуємо всі документи за вчорашній день
+            const countryVerificationsSnapshot = await this.verificationsCollection
+                .where('day', '==', day)
+                .get();
+
+            if (countryVerificationsSnapshot.empty) {
+                return null;
+            }
+
+            const transformedData: { [key: string]: any } = {
+                createdAt: null,
+                day: day,
+                countryID: countryID
+            };
+
+            countryVerificationsSnapshot.docs.forEach(doc => {
+                const data = doc.data() as VerificationDocument;
+                const serviceID = data.serviceID;
+                if (data[countryID] && data[countryID].count > 0) {
+                    transformedData.createdAt = data.createdAt || transformedData.createdAt;
+                    transformedData[serviceID] = data[countryID];
+                }
+            });
+
+            return transformedData;
+
+        } catch (error) {
+            this.logger.error('Error in getLastVerificationsByCountry:', error);
+            throw error;
         }
     }
 
@@ -162,7 +219,7 @@ export class VerificationsService {
                     break;
                 case '':
                     this.logger.warn('Create verifications...');
-                    // await this.createVerifications();
+                    await this.createVerifications('2024-07-30');
                     return { message: 'not ready' };
                 default:
                     this.logger.warn(`Unknown source: ${source}`);
