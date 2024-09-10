@@ -10,6 +10,10 @@ import customParseFormat from 'dayjs/plugin/customParseFormat';
 import {ServiceDocument} from "../services/documents/service.document";
 import * as _ from 'lodash';
 import {CountryDocument} from "../countries/documents/country.document";
+// @ts-ignore
+import { Parser } from 'json2csv';
+import * as fs from 'fs';
+
 dayjs.extend(customParseFormat);
 interface GetAllVerificationsParams {
     source?: string;
@@ -68,6 +72,52 @@ export class VerificationsService {
         return snapshot.docs.length;
     }
 
+    async exportVerificationsToCSV(day: string) {
+        try {
+            const verificationsSnapshot = await this.verificationsCollection.where('day', '==', day).get();
+
+            if (verificationsSnapshot.empty) {
+                this.logger.log(`No verifications found for day: ${day}`);
+                return;
+            }
+
+            const verificationsData: any[] = [];
+
+            verificationsSnapshot.docs.forEach((doc) => {
+                const data = doc.data();
+                const verificationEntry: { [key: string]: any } = {
+                    id: doc.id,
+                    day: data.day,
+                    serviceID: data.serviceID,
+                    totalServiceCount: data.totalServiceCount,
+                    verificationsFor100USD: data.verificationsFor100USD,
+                    createdAt: data.createdAt && data.createdAt.toDate().toISOString(),
+                };
+
+                // Додаємо дані по країнам, якщо є
+                Object.keys(data).forEach((key) => {
+                    if (key !== 'day' && key !== 'serviceID' && key !== 'totalServiceCount' && key !== 'verificationsFor100USD' && key !== 'createdAt') {
+                        verificationEntry[`${key}_priceUSD`] = data[key]?.priceUSD || 0;
+                        verificationEntry[`${key}_count`] = data[key]?.count || 0;
+                    }
+                });
+
+                verificationsData.push(verificationEntry);
+            });
+
+            const json2csvParser = new Parser();
+            const csv = json2csvParser.parse(verificationsData);
+
+            const filePath = `verifications_${day}.csv`;
+            fs.writeFileSync(filePath, csv);
+
+            this.logger.log(`CSV file created: ${filePath}`);
+
+        } catch (error) {
+            this.logger.error('Error exporting verifications to CSV:', error);
+        }
+    }
+
     async createVerifications(day: string) {
         try {
             let batch = this.verificationsCollection.firestore.batch();
@@ -98,6 +148,7 @@ export class VerificationsService {
                 const countriesSnapshot = await this.countriesCollection.get();
                 const verification: { [countryId: string]: VerificationEntry } = {};
                 let totalServiceCount = 0; // Змінна для зберігання загальної кількості верифікацій для сервісу
+                let verificationsFor100USD = 0;
 
                 for (const countryDoc of countriesSnapshot.docs) {
                     const smsActivateDoc = smsActivateDocs.find(el => el.country === countryDoc.data().id_activate);
@@ -106,18 +157,20 @@ export class VerificationsService {
                     const smshubDoc = smshubDocs.find(el => el.country === countryDoc.data().id_smshub);
 
                     const totalCount = (smsActivateDoc?.count || 0) + (fiveSimDoc?.count || 0) + (smspvaDoc?.count || 0) + (smshubDoc?.count || 0);
+                    const countryPrice = (
+                        ((smsActivateDoc?.price || 0) / 100 * (smsActivateDoc?.count || 0)) +
+                        ((fiveSimDoc?.price || 0) / 100 * (fiveSimDoc?.count || 0)) +
+                        ((smspvaDoc?.price || 0) * (smspvaDoc?.count || 0)) +
+                        ((smshubDoc?.price || 0) * (smshubDoc?.count || 0))
+                    ) / totalCount;
 
                     if (totalCount > 0) {
                         verification[countryDoc.id] = {
-                            priceUSD: (
-                                ((smsActivateDoc?.price || 0) / 100 * (smsActivateDoc?.count || 0)) +
-                                ((fiveSimDoc?.price || 0) / 100 * (fiveSimDoc?.count || 0)) +
-                                ((smspvaDoc?.price || 0) * (smspvaDoc?.count || 0)) +
-                                ((smshubDoc?.price || 0) * (smshubDoc?.count || 0))
-                            ) / totalCount,
+                            priceUSD: countryPrice,
                             count: totalCount
                         };
                         totalServiceCount += totalCount;
+                        verificationsFor100USD += (100 / countryPrice) * totalCount;
                     }
                 }
 
@@ -126,6 +179,7 @@ export class VerificationsService {
                     createdAt: Timestamp.now(),
                     serviceID: serviceDoc.id,
                     totalServiceCount,
+                    verificationsFor100USD,
                     ...verification
                 };
 
@@ -140,11 +194,19 @@ export class VerificationsService {
             this.logger.error('Error in createVerifications:', error);
         }
     }
+    async getVerificationsByServiceForTimeline (serviceID: string, body: any) {
+        const servicesSnapshot = await this.verificationsCollection
+            .where('serviceID', '==', serviceID)
+            .orderBy('day', 'desc')
+            .limit(5)
+            .get();
+        return servicesSnapshot.docs.map(el => el.data());
+    }
 
     async getLastVerificationsByService(serviceID: string) {
         const servicesSnapshot = await this.verificationsCollection
             .where('serviceID', '==', serviceID)
-            .orderBy('day')
+            .orderBy('day', 'desc')
             .limit(1)
             .get();
         return servicesSnapshot.docs.map(el => el.data())[0];
@@ -158,6 +220,60 @@ export class VerificationsService {
         const day = yesterday.getDate().toString().padStart(2, '0');
         return `${year}-${month}-${day}`;
     }
+    async getVerificationsByCountryForTimeline(countryID: string, body: any) {
+        try {
+            const { services, days } = body;
+            const transformedData: { [key: string]: any } = {
+                countryID: countryID,
+                days: []
+            };
+
+            for (let i = 1; i < days+1; i++) {
+                const currentDay = this.getDateNDaysAgo(i);
+                const countryVerificationsSnapshot = await this.verificationsCollection
+                    .where('day', '==', currentDay)
+                    .where('serviceID', 'in', services)
+                    .get();
+
+                if (!countryVerificationsSnapshot.empty) {
+                    const dayData: { [key: string]: any } = {
+                        day: currentDay,
+                    };
+
+                    countryVerificationsSnapshot.docs.forEach(doc => {
+                        const data = doc.data() as VerificationDocument;
+                        const serviceID = data.serviceID;
+                        if (data[countryID] && data[countryID].count > 0) {
+                            dayData[serviceID] = data[countryID];
+                        }
+                    });
+
+                    transformedData.days.push(dayData);
+                }
+            }
+
+            return transformedData.days.length > 0 ? transformedData : null;
+
+        } catch (error) {
+            this.logger.error('Error in getVerificationsByCountryForTimeline:', error);
+            throw error;
+        }
+    }
+
+    private getDateNDaysAgo(n: number): string {
+        const date = new Date();
+        date.setDate(date.getDate() - n);
+        return this.formatDateToString(date);
+    }
+
+    private formatDateToString(date: Date): string {
+        const yyyy = date.getFullYear();
+        const mm = String(date.getMonth() + 1).padStart(2, '0'); // Січень - 0!
+        const dd = String(date.getDate()).padStart(2, '0');
+        return `${yyyy}-${mm}-${dd}`;
+    }
+
+
     async getLastVerificationsByCountry(countryID: string) {
         try {
             const day = this.getYesterdayDate();
@@ -194,6 +310,37 @@ export class VerificationsService {
         }
     }
 
+    async updateCountryIndexes(day: string) {
+        try {
+            const verificationsSnapshot = await this.verificationsCollection
+                .where('day', '==', day)
+                .get();
+
+            const countriesSnapshot = await this.countriesCollection
+                .where('not_used', '==', false)
+                .get();
+
+            if (verificationsSnapshot.empty) {
+                return null;
+            }
+            for (const countryDoc of countriesSnapshot.docs) {
+                let totalCountryCount = 0
+                verificationsSnapshot.docs.forEach(verificationDoc => {
+                    const data = verificationDoc.data() as VerificationDocument;
+                    if (data[countryDoc.id] && data[countryDoc.id].count > 0) {
+                        totalCountryCount += data[countryDoc.id].count;
+                    }
+                });
+
+                await this.countriesCollection.doc(countryDoc.id).update({ totalCountryCount });
+            }
+            return 'finish'
+        } catch (error) {
+            this.logger.error('Error in getLastVerificationsByCountry:', error);
+            throw error;
+        }
+    }
+
     async updateVerifications(source: string, part?: string): Promise<{ message: string }> {
         try {
             switch (source) {
@@ -219,7 +366,10 @@ export class VerificationsService {
                     break;
                 case '':
                     this.logger.warn('Create verifications...');
-                    await this.createVerifications('2024-07-30');
+                    const today = new Date();
+                    today.setDate(today.getDate() - 1);
+                    const date = today.toISOString().split('T')[0];
+                    await this.createVerifications(date);
                     return { message: 'not ready' };
                 default:
                     this.logger.warn(`Unknown source: ${source}`);

@@ -2876,11 +2876,25 @@
     "flag": "https://firebasestorage.googleapis.com/v0/b/ccaf-afea.appspot.com/o/flags%2FUnited%20States.svg?alt=media&token=b4a4bead-995b-467e-80e3-a0f97848529f",
     "region": "{\"x\": 210, \"y\": 390}",
     "region_wb": "North America",
+    "id_activate": 187,
+    "id_5sim": "",
+    "id_smshub": 187,
+    "id_simsms": "us",
+    "id_smspva": "US",
+    "not_used": null
+  },
+  {
+    "name": "United States (Virtual)",
+    "id": "UV",
+    "code": "UV",
+    "flag": "https://firebasestorage.googleapis.com/v0/b/ccaf-afea.appspot.com/o/flags%2FUnited%20States.svg?alt=media&token=b4a4bead-995b-467e-80e3-a0f97848529f",
+    "region": "{\"x\": 210, \"y\": 390}",
+    "region_wb": "North America",
     "id_activate": 12,
     "id_5sim": "us",
     "id_smshub": 12,
-    "id_simsms": "us",
-    "id_smspva": "US",
+    "id_simsms": "",
+    "id_smspva": "",
     "not_used": null
   },
   {

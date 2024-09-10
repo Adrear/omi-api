@@ -6,10 +6,10 @@ export class ServicesController {
     constructor(private readonly servicesService: ServicesService) {}
 
     @Get()
-    async getAllServices(@Query() query: { lastVisible: string, itemsPerPage: string }) {
-        const { lastVisible, itemsPerPage } = query;
+    async getAllServices(@Query() query: { lastVisible: string, itemsPerPage: string, endAt?: string }) {
+        const { lastVisible, itemsPerPage, endAt } = query;
         const itemsPerPageNumber = parseInt(itemsPerPage, 10);
-        return this.servicesService.getAllServices({ lastVisible, itemsPerPage: itemsPerPageNumber });
+        return this.servicesService.getAllServices({ lastVisible, itemsPerPage: itemsPerPageNumber, endAt });
     }
 
     @Post('add')

@@ -34,8 +34,8 @@ export class CountriesService {
         // const totalSnapshot = await this.servicesCollection.get();
         // const totalDocuments = totalSnapshot.size;
         let query = this.countriesCollection
-            // .orderBy('totalCountryCount', 'desc')
-            .orderBy('id')
+            .where('not_used', '==', false)
+            .orderBy('totalCountryCount', 'desc')
             .limit(itemsPerPage);
 
         if (lastVisible) {
@@ -107,7 +107,7 @@ export class CountriesService {
                 id_smshub: country.id_smshub?.toString(),
                 id_simsms: country.id_simsms,
                 id_smspva: country.id_smspva,
-                not_used: country.not_used,
+                not_used: !!country.not_used,
             };
             Object.keys(countryData).forEach(key => {
                 if (countryData[key] === undefined || countryData[key] === null || countryData[key] === "") {

@@ -1,8 +1,15 @@
 import {Inject, Injectable, Logger} from '@nestjs/common';
-import { HttpService } from '@nestjs/axios';
-import { CollectionReference } from '@google-cloud/firestore';
-import { firstValueFrom } from 'rxjs';
-import { ServiceDocument, SmshubServiceDocument, SmsActivateServiceDocument, FiveSimServiceDocument, SimsmsServiceDocument, SmspvaServiceDocument } from './documents/index.document';
+import {HttpService} from '@nestjs/axios';
+import {CollectionReference} from '@google-cloud/firestore';
+import {firstValueFrom} from 'rxjs';
+import {
+    ServiceDocument,
+    SmshubServiceDocument,
+    SmsActivateServiceDocument,
+    FiveSimServiceDocument,
+    SimsmsServiceDocument,
+    SmspvaServiceDocument
+} from './documents/index.document';
 import {ConfigService} from "@nestjs/config";
 import dataSmshub from "./smshub.json";
 import data5sim from "./5sim.json";
@@ -29,53 +36,73 @@ export class ServicesService {
         private smspvaServicesCollection: CollectionReference<SmspvaServiceDocument>,
         private readonly httpService: HttpService,
         private readonly configService: ConfigService
-    ) {}
+    ) {
+    }
 
-    async getAllServices({ lastVisible, itemsPerPage = 20 }: { lastVisible?: string | null, itemsPerPage?: number }) {
-        // const totalSnapshot = await this.servicesCollection.get();
-        // const totalDocuments = totalSnapshot.size;
+    async getAllServices({
+                             lastVisible,
+                             itemsPerPage,
+                             endAt
+                         }: {
+        lastVisible?: string | null,
+        itemsPerPage: number,
+        endAt?: string
+    }) {
         let query = this.servicesCollection
-            .orderBy('totalServiceCount', 'desc')
-            .limit(itemsPerPage);
+            .orderBy('totalServiceCount', 'desc');
 
-        if (lastVisible) {
-            query = query.startAfter(lastVisible);
+        if (endAt) {
+            const endAtDoc = await this.servicesCollection.doc(endAt).get();
+            if (endAtDoc.exists) {
+                query = query.endAt(endAtDoc);
+            }
+        } else if (lastVisible) {
+            const lastVisibleDoc = await this.servicesCollection.doc(lastVisible).get();
+            if (lastVisibleDoc.exists) {
+                query = query.startAfter(lastVisibleDoc);
+            }
         }
+
+        if (Number.isInteger(itemsPerPage) && itemsPerPage > 0) {
+            query = query.limit(itemsPerPage);
+        }
+
         const snapshot = await query.get();
         const services = snapshot.docs.map(doc => doc.data());
-        const lastVisibleDoc = snapshot.docs[snapshot.docs.length - 1];
+        const newLastVisible = snapshot.docs[snapshot.docs.length - 1]?.id || null;
+
         return {
             data: services,
             meta: {
-                // total: totalDocuments,
-                lastVisible: lastVisibleDoc ? lastVisibleDoc.id : null,
+                lastVisible: newLastVisible,
             }
         };
     }
+
 
     async updateServices(source: string): Promise<{ message: string }> {
         try {
             if (!source) {
                 await this.updateMasterServices();
-                return { message: 'Services updated successfully' };
+                return {message: 'Services updated successfully'};
             } else if (source === 'smshub') {
                 await this.addSmshubServices();
-                return { message: 'Services updated successfully' };
+                return {message: 'Services updated successfully'};
             } else if (source === 'simsms') {
                 await this.addSimsmsServices();
-                return { message: 'Services updated successfully' };
+                return {message: 'Services updated successfully'};
             } else if (source === 'smspva') {
                 await this.addSmspvaServices();
-                return { message: 'Services updated successfully' };
+                return {message: 'Services updated successfully'};
             } else if (source === '5sim') {
                 await this.addFiveSimServices();
-                return { message: 'Services updated successfully' };
+                return {message: 'Services updated successfully'};
             } else {
                 const apiUrl = this.getApiUrl(source);
                 const response = await firstValueFrom(this.httpService.get(apiUrl));
                 if (response.data) {
                     await this.addServices(response.data, source);
-                    return { message: 'Services updated successfully' };
+                    return {message: 'Services updated successfully'};
                 } else {
                     throw new Error('Failed to fetch services');
                 }
@@ -141,6 +168,7 @@ export class ServicesService {
         }
         await batch.commit();
     }
+
     private async addSimsmsServices() {
         const batch = this.simsmsServicesCollection.firestore.batch();
         for (const service of dataSimsms) {
@@ -152,6 +180,7 @@ export class ServicesService {
         }
         await batch.commit();
     }
+
     private async addSmspvaServices() {
         const batch = this.smspvaServicesCollection.firestore.batch();
         for (const service of dataSmspva) {
@@ -163,6 +192,7 @@ export class ServicesService {
         }
         await batch.commit();
     }
+
     private async addFiveSimServices(): Promise<void> {
         const batch = this.fiveSimServicesCollection.firestore.batch();
         for (const country of data5sim) {

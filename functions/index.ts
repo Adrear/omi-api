@@ -65,7 +65,7 @@ export const scheduledFunctionSecondPart = functions.region('europe-west1')
 export const scheduledFunctionThirdPart = functions.region('europe-west1')
     .runWith({ timeoutSeconds: TIMEOUT_SECONDS })
     .pubsub
-    .schedule('* 23 * * *')
+    .schedule('0 23 * * *')
     .timeZone(TIMEZONE)
     .onRun(async (context) => {
         const verificationsService = await initializeService();
@@ -73,4 +73,16 @@ export const scheduledFunctionThirdPart = functions.region('europe-west1')
             verificationsService.updateVerifications('5sim', '3').then(() => undefined),
             verificationsService.updateVerifications('smshub', '3').then(() => undefined),
         ], 'Third');
+    });
+//
+export const createVerifications = functions.region('europe-west1')
+    .runWith({ timeoutSeconds: TIMEOUT_SECONDS })
+    .pubsub
+    .schedule('0 0 * * *')
+    .timeZone(TIMEZONE)
+    .onRun(async (context) => {
+        const verificationsService = await initializeService();
+        await executeVerifications([
+            verificationsService.updateVerifications('').then(() => undefined)
+        ], 'Final');
     });
