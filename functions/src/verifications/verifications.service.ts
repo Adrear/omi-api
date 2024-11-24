@@ -6,6 +6,7 @@ import { FiveSimService } from './byService/5sim.service';
 import { SmsActivateService } from './byService/sms-activate.service';
 import { SmspvaService } from './byService/smspva.service';
 import dayjs from 'dayjs';
+import pLimit from 'p-limit';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 import {ServiceDocument} from "../services/documents/service.document";
 import * as _ from 'lodash';
@@ -120,10 +121,11 @@ export class VerificationsService {
 
     async createVerifications(day: string) {
         try {
+            const limit = pLimit(5);
             let batch = this.verificationsCollection.firestore.batch();
             const servicesSnapshot = await this.servicesCollection.get();
 
-            const promises = servicesSnapshot.docs.map(async (serviceDoc) => {
+            const promises = servicesSnapshot.docs.map((serviceDoc) => limit(async () => {
                 this.logger.log(serviceDoc.id);
 
                 const [smsActivateDocs, fiveSimDocs, smspvaDocs, smshubDocs] = await Promise.all([
@@ -147,7 +149,7 @@ export class VerificationsService {
 
                 const countriesSnapshot = await this.countriesCollection.get();
                 const verification: { [countryId: string]: VerificationEntry } = {};
-                let totalServiceCount = 0; // Змінна для зберігання загальної кількості верифікацій для сервісу
+                let totalServiceCount = 0;
                 let verificationsFor100USD = 0;
 
                 for (const countryDoc of countriesSnapshot.docs) {
@@ -186,7 +188,8 @@ export class VerificationsService {
                 const docRef = this.verificationsCollection.doc(`${day}_${serviceDoc.id}`);
                 batch.set(docRef, verificationData);
                 await this.servicesCollection.doc(serviceDoc.id).update({ totalServiceCount });
-            });
+            }));
+
             await Promise.all(promises);
             await batch.commit();
 
@@ -212,14 +215,6 @@ export class VerificationsService {
         return servicesSnapshot.docs.map(el => el.data())[0];
     }
 
-    private getYesterdayDate(): string {
-        const yesterday = new Date();
-        yesterday.setDate(yesterday.getDate() - 1);
-        const year = yesterday.getFullYear();
-        const month = (yesterday.getMonth() + 1).toString().padStart(2, '0');
-        const day = yesterday.getDate().toString().padStart(2, '0');
-        return `${year}-${month}-${day}`;
-    }
     async getVerificationsByCountryForTimeline(countryID: string, body: any) {
         try {
             const { services, days } = body;
@@ -276,20 +271,31 @@ export class VerificationsService {
 
     async getLastVerificationsByCountry(countryID: string) {
         try {
-            const day = this.getYesterdayDate();
+            const latestDaySnapshot = await this.verificationsCollection
+                .orderBy('day', 'desc')
+                .limit(1)
+                .get();
 
-            // Отримуємо всі документи за вчорашній день
+            if (latestDaySnapshot.empty) {
+                this.logger.log('No verifications found in the collection.');
+                return null;
+            }
+
+            const latestDay = latestDaySnapshot.docs[0].data().day;
+            this.logger.debug(`Latest day found: ${latestDay}`);
+
             const countryVerificationsSnapshot = await this.verificationsCollection
-                .where('day', '==', day)
+                .where('day', '==', latestDay)
                 .get();
 
             if (countryVerificationsSnapshot.empty) {
+                this.logger.log(`No verifications found for the latest day: ${latestDay}`);
                 return null;
             }
 
             const transformedData: { [key: string]: any } = {
                 createdAt: null,
-                day: day,
+                day: latestDay,
                 countryID: countryID
             };
 
@@ -370,6 +376,7 @@ export class VerificationsService {
                     today.setDate(today.getDate() - 1);
                     const date = today.toISOString().split('T')[0];
                     await this.createVerifications(date);
+                    // await this.createVerifications('2024-11-23');
                     return { message: 'not ready' };
                 default:
                     this.logger.warn(`Unknown source: ${source}`);
