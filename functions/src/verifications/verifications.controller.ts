@@ -39,6 +39,16 @@ export class VerificationsController {
     async updateVerifications(@Query('source') source: string) {
         return await this.verificationsService.updateVerifications(source);
     }
+
+    @Get('create-verifications-by-country')
+    async createVerificationsByCountriesForMonth() {
+        const months = ['2024-12'];
+        for (const month of months) {
+            await this.verificationsService.createVerificationsByCountriesForMonth(month);
+        }
+        return { message: 'There created new collection' };
+    }
+
     @Get('update-country-indexes')
     async updateCountryIndexes(@Query('day') day: string) {
         return await this.verificationsService.updateCountryIndexes(day);

@@ -32,7 +32,7 @@ export const api = functions.region('europe-west1').https.onRequest(async (reque
     expressServer(request, response);
 });
 const TIMEOUT_SECONDS = 540;
-const TIMEZONE = 'Europe/Kyiv';
+const TIMEZONE = 'UTC';
 
 export const scheduledFunctionFirstPart = functions.region('europe-west1')
     .runWith({ timeoutSeconds: TIMEOUT_SECONDS })

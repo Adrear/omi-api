@@ -14,6 +14,7 @@ import {CountryDocument} from "../countries/documents/country.document";
 // @ts-ignore
 import { Parser } from 'json2csv';
 import * as fs from 'fs';
+import axios from 'axios';
 
 dayjs.extend(customParseFormat);
 interface GetAllVerificationsParams {
@@ -24,6 +25,11 @@ interface GetAllVerificationsParams {
 interface VerificationEntry {
     priceUSD: number;
     count: number;
+}
+
+function getDocumentSize(doc: any): number {
+    const jsonData = JSON.stringify(doc);
+    return Buffer.byteLength(jsonData, 'utf-8'); // Розмір у байтах
 }
 
 
@@ -121,6 +127,23 @@ export class VerificationsService {
 
     async createVerifications(day: string) {
         try {
+            const getExchangeRate = async (): Promise<number> => {
+                try {
+                    const response = await axios.get('https://v6.exchangerate-api.com/v6/cc921650c3cd76ed6d008c04/latest/USD');
+                    const exchangeRate = response.data.conversion_rates?.RUB;
+                    if (!exchangeRate) {
+                        this.logger.warn('Exchange rate RUB to USD not found. Defaulting to 100.');
+                        return 100;
+                    }
+                    return exchangeRate;
+                } catch (error: any) {
+                    this.logger.error('Failed to fetch exchange rate. Defaulting to 100:', error.message);
+                    return 100;
+                }
+            };
+
+            const exchangeRate = await getExchangeRate();
+
             const limit = pLimit(5);
             let batch = this.verificationsCollection.firestore.batch();
             const servicesSnapshot = await this.servicesCollection.get();
@@ -159,9 +182,10 @@ export class VerificationsService {
                     const smshubDoc = smshubDocs.find(el => el.country === countryDoc.data().id_smshub);
 
                     const totalCount = (smsActivateDoc?.count || 0) + (fiveSimDoc?.count || 0) + (smspvaDoc?.count || 0) + (smshubDoc?.count || 0);
+
                     const countryPrice = (
-                        ((smsActivateDoc?.price || 0) / 100 * (smsActivateDoc?.count || 0)) +
-                        ((fiveSimDoc?.price || 0) / 100 * (fiveSimDoc?.count || 0)) +
+                        ((smsActivateDoc?.price || 0) / exchangeRate * (smsActivateDoc?.count || 0)) +
+                        ((fiveSimDoc?.price || 0) / exchangeRate * (fiveSimDoc?.count || 0)) +
                         ((smspvaDoc?.price || 0) * (smspvaDoc?.count || 0)) +
                         ((smshubDoc?.price || 0) * (smshubDoc?.count || 0))
                     ) / totalCount;
@@ -346,6 +370,87 @@ export class VerificationsService {
             throw error;
         }
     }
+    async createVerificationsByCountriesForMonth(month: string) {
+        try {
+            if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(month)) {
+                throw new Error(`Invalid month format: ${month}. Expected format is YYYY-MM.`);
+            }
+
+            const startDay = `${month}-01`;
+            const endDay = dayjs(startDay).endOf('month').format('YYYY-MM-DD');
+
+            // Завантажуємо дані
+            const verificationsSnapshot = await this.verificationsCollection
+                .where('day', '>=', startDay)
+                .where('day', '<=', endDay)
+                .get();
+
+            if (verificationsSnapshot.empty) {
+                this.logger.log(`No verifications found for the month: ${month}`);
+                return;
+            }
+
+            const countryData: { [key: string]: any } = {};
+
+            // Генеруємо дані для кожної країни
+            verificationsSnapshot.docs.forEach(doc => {
+                const { day, serviceID, createdAt, totalServiceCount, verificationsFor100USD, ...rest } = doc.data();
+                const dayIndex = parseInt(day.slice(-2), 10) - 1;
+                const countryMonth = day.slice(0, 7);
+
+                Object.entries(rest).forEach(([countryID, countryInfo]: [string, any]) => {
+                    const documentId = `${countryMonth}_${countryID}`;
+
+                    if (!countryData[documentId]) {
+                        countryData[documentId] = {
+                            month: countryMonth,
+                            countryID,
+                            createdAt: Timestamp.now(),
+                            services: [],
+                        };
+                    }
+
+                    let serviceEntry = countryData[documentId].services.find(
+                        (s: any) => s.serviceID === serviceID
+                    );
+
+                    if (!serviceEntry) {
+                        serviceEntry = { serviceID, data: Array(31).fill(null) };
+                        countryData[documentId].services.push(serviceEntry);
+                    }
+
+                    serviceEntry.data[dayIndex] = countryInfo;
+                });
+            });
+
+            const newCollection = this.verificationsCollection.firestore.collection('verificationsByCountries');
+            const limit = pLimit(3); // Ліміт одночасних запитів
+            const writePromises: Promise<void>[] = []; // Оголошуємо тип явно
+
+            Object.entries(countryData).forEach(([docId, docData], index) => {
+                writePromises.push(limit(async () => {
+                    const docSize = getDocumentSize(docData);
+
+                    if (docSize > 1048576) {
+                        this.logger.error(`Document ${docId} exceeds size limit: ${docSize} bytes`);
+                        return; // Пропускаємо великі документи
+                    }
+
+                    const docRef = newCollection.doc(docId);
+
+                    // Записуємо дані в Firestore
+                    await docRef.set(docData);
+                    this.logger.log(`Written document: ${docId}`);
+                }));
+            });
+
+            await Promise.all(writePromises);
+            this.logger.log(`Processed verifications for the month: ${month}`);
+        } catch (error) {
+            this.logger.error('Error creating verificationsByCountries:', error);
+        }
+    }
+
 
     async updateVerifications(source: string, part?: string): Promise<{ message: string }> {
         try {

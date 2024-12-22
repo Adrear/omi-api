@@ -5,7 +5,7 @@ import { FirestoreModule } from './firestore/firestore.module';
 import { VerificationsModule } from './verifications/verifications.module';
 import {ServicesModule} from "./services/services.module";
 import {CountriesModule} from "./countries/countries.module";
-
+import { ContactModule } from './nodemailer/contact.module';
 @Module({
     imports: [
         ConfigModule.forRoot({
@@ -21,7 +21,8 @@ import {CountriesModule} from "./countries/countries.module";
         }),
         VerificationsModule,
         ServicesModule,
-        CountriesModule
+        CountriesModule,
+        ContactModule
     ],
     controllers: [],
     providers: [],
