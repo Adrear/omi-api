@@ -98,7 +98,7 @@ export async function createVerificationsUtil({
                         ((fiveSimDoc?.price || 0) / exchangeRate * (fiveSimDoc?.count || 0)) +
                         ((smspvaDoc?.price || 0) * (smspvaDoc?.count || 0)) +
                         ((smshubDoc?.price || 0) * (smshubDoc?.count || 0))
-                    ) / (totalCount || 1); // уникнути ділення на 0
+                    ) / (totalCount || 1);
 
                     if (totalCount > 0) {
                         verification[countryDoc.id] = {

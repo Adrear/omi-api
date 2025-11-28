@@ -244,7 +244,6 @@ export class VerificationsService {
             const startDay = `${month}-01`;
             const endDay = dayjs(startDay).endOf('month').format('YYYY-MM-DD');
 
-            // Завантажуємо дані
             const verificationsSnapshot = await this.verificationsCollection
                 .where('day', '>=', startDay)
                 .where('day', '<=', endDay)
@@ -257,7 +256,6 @@ export class VerificationsService {
 
             const countryData: { [key: string]: any } = {};
 
-            // Генеруємо дані для кожної країни
             verificationsSnapshot.docs.forEach(doc => {
                 const { day, serviceID, createdAt, totalServiceCount, verificationsFor100USD, ...rest } = doc.data();
                 const dayIndex = parseInt(day.slice(-2), 10) - 1;
@@ -289,8 +287,8 @@ export class VerificationsService {
             });
 
             const newCollection = this.verificationsCollection.firestore.collection('verificationsByCountries');
-            const limit = pLimit(3); // Ліміт одночасних запитів
-            const writePromises: Promise<void>[] = []; // Оголошуємо тип явно
+            const limit = pLimit(3);
+            const writePromises: Promise<void>[] = [];
 
             Object.entries(countryData).forEach(([docId, docData], index) => {
                 writePromises.push(limit(async () => {
@@ -298,12 +296,11 @@ export class VerificationsService {
 
                     if (docSize > 1048576) {
                         this.logger.error(`Document ${docId} exceeds size limit: ${docSize} bytes`);
-                        return; // Пропускаємо великі документи
+                        return;
                     }
 
                     const docRef = newCollection.doc(docId);
 
-                    // Записуємо дані в Firestore
                     await docRef.set(docData);
                     this.logger.log(`Written document: ${docId}`);
                 }));
@@ -328,19 +325,13 @@ export class VerificationsService {
             const stream = fs.createWriteStream(filePath, { flags: 'w' });
             stream.write('date,serviceID,serviceName,countryID,exchangeRate,count,priceUSD,smspva_count,smspva_priceUSD,smshub_count,smshub_priceUSD,sms_activate_count,sms_activate_priceRUB,5sim_count,5sim_priceRUB\n');
 
-            const limit = pLimit(5); // Запускати не більше 5 потоків одночасно
+            const limit = pLimit(5);
 
             await Promise.all(
                 servicesSnapshot.docs.map(serviceDoc =>
                     limit(() => this.exportVerificationsByServiceToCSV(serviceDoc.id, month, stream))
                 )
             );
-
-            // for (const serviceDoc of servicesSnapshot.docs) {
-            //     const serviceID = serviceDoc.id;
-            //     this.logger.log(`Processing service: ${serviceID}`);
-            //     await this.exportVerificationsByServiceToCSV(serviceID, month, stream);
-            // }
 
             stream.end();
             this.logger.log(`CSV file created successfully: ${filePath}`);

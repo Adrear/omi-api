@@ -37,8 +37,9 @@ export class VerificationsController {
     @UseGuards(ApiTokenGuard)
     @Get('create-verifications-by-country')
     async createVerificationsByCountriesForMonth() {
-        const months = ['2025-10', '2025-11'];
+        const months = ['2025-11'];
         for (const month of months) {
+            console.log('Exporting verifications for month:', month);
             await this.verificationsService.createVerificationsByCountriesForMonth(month);
         }
         return { message: 'There created new collection' };

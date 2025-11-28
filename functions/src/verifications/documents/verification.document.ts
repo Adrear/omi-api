@@ -7,7 +7,7 @@ export class VerificationDocument {
     serviceID: string;
     createdAt?: Timestamp;
     totalServiceCount: number;
-    [countryID: string]: any; // Динамічні ключі для країн
+    [countryID: string]: any;
 
     constructor(
         day: string,

@@ -9,7 +9,7 @@ import { ConfigService } from '@nestjs/config';
 export class ExchangeRatesService {
     private logger: Logger = new Logger(ExchangeRatesService.name);
     private readonly apiKey: string;
-    private readonly baseCurrency = 'USD'; // Базова валюта для запиту
+    private readonly baseCurrency = 'USD';
 
     constructor(
         @Inject(ExchangeRatesDocument.collectionName)
@@ -41,7 +41,6 @@ export class ExchangeRatesService {
     private async fetchExchangeRates(date: string): Promise<Partial<ExchangeRatesDocument> | null> {
         const [year, month, day] = date.split('-');
 
-        // Видаляємо ведучі нулі
         const formattedMonth = String(Number(month));
         const formattedDay = String(Number(day));
 
@@ -72,7 +71,7 @@ export class ExchangeRatesService {
     private async saveExchangeRateToFirestore(date: string, exchangeRate: Partial<ExchangeRatesDocument>) {
         try {
             const fullDocument: ExchangeRatesDocument = {
-                id: date, // ID має бути присутнім
+                id: date,
                 date: date,
                 base_code: exchangeRate.base_code ?? 'USD',
                 USD: exchangeRate.USD ?? 0,

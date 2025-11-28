@@ -21,9 +21,9 @@ export async function getAllVerificationsUtil({
     let collection: CollectionReference<VerificationDocument> | CollectionReference<SmsActivateVerificationDocument> | CollectionReference<FiveSimVerificationDocument>;
 
     if (source === 'sms-activate') {
-        return 0; // Можна реалізувати логіку, якщо потрібно
+        return 0;
     } else if (source === '5sim') {
-        return 0; // Можна реалізувати логіку, якщо потрібно
+        return 0;
     } else {
         collection = verificationsCollection;
     }

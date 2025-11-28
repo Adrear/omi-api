@@ -11,7 +11,6 @@
 //             this.logger.log(`Processing service: ${serviceID}`);
 //             await this.createVerificationsByServiceForMonth(serviceID, month);
 //         }
-//         this.logger.log(`Дані для всіх сервісів за місяць ${month} успішно оброблені.`);
 //     } catch (error) {
 //         this.logger.error('Error in createVerificationsForAllServices:', error);
 //     }
