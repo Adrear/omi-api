@@ -455,7 +455,6 @@ export class VerificationsService {
                     today.setDate(today.getDate() - 1);
                     const date = today.toISOString().split('T')[0];
                     await this.createVerifications(date);
-                    // await this.createVerifications('2024-11-23');
                     return { message: 'not ready' };
                 default:
                     this.logger.warn(`Unknown source: ${source}`);

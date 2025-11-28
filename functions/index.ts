@@ -70,3 +70,5 @@ export const createVerifications = functions.region(REGION)
             verificationsService.updateVerifications('')
         ], 'Final');
     });
+
+export { api } from './api';
