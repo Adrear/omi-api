@@ -235,6 +235,33 @@ export class VerificationsService {
         }
     }
 
+    async createVerificationsByServicesForMonth(month: string) {
+        if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(month)) {
+            throw new Error(`Invalid month format: ${month}. Expected format is YYYY-MM.`);
+        }
+
+        const servicesSnapshot = await this.servicesCollection.get();
+        if (servicesSnapshot.empty) {
+            this.logger.warn('No services found.');
+            return;
+        }
+
+        const limit = pLimit(3);
+        await Promise.all(
+            servicesSnapshot.docs.map(serviceDoc =>
+                limit(async () => {
+                    try {
+                        await this.createVerificationsByServiceForMonth(serviceDoc.id, month);
+                    } catch (error) {
+                        this.logger.error(`Failed to create verifications for service ${serviceDoc.id} for month ${month}`, error as Error);
+                    }
+                })
+            )
+        );
+
+        this.logger.log(`Completed verificationsByServices for month ${month}`);
+    }
+
     async createVerificationsByCountriesForMonth(month: string) {
         try {
             if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(month)) {

@@ -45,19 +45,24 @@ export class VerificationsController {
         return { message: 'There created new collection' };
     }
 
-    // @Get('create-verifications-by-services')
-    // async createVerificationsByServicesForMonth() {
-    //     const months = ['2024-12', '2025-01', '2025-02', '2024-09'];
-    //     for (const month of months) {
-    //         await this.verificationsService.createVerificationsForAllServices(month);
-    //     }
-    //     return { message: 'There created new collection' };
-    // }
+    @UseGuards(ApiTokenGuard)
+    @Get('create-verifications-by-services')
+    async createVerificationsByServicesForMonth() {
+        const months = ['2025-02', '2025-03', '2025-04', '2025-05', '2025-06', '2025-07', '2025-08', '2025-09', '2025-10', '2025-11'];
+        for (const month of months) {
+            await this.verificationsService.createVerificationsByServicesForMonth(month);
+        }
+        // if (!month) {
+        //     return { message: 'Month is required in format YYYY-MM' };
+        // }
+        // await this.verificationsService.createVerificationsByServicesForMonth(month);
+        return { message: `There created new collection` };
+    }
 
     @UseGuards(ApiTokenGuard)
     @Get('export-verifications-by-services')
     async exportVerificationsByServicesForMonth() {
-        const months = ['2025-06'];
+        const months = ['2025-05', '2025-06', '2025-07', '2025-08', '2025-09', '2025-10', '2025-11'];
         for (const month of months) {
             await this.verificationsService.exportVerificationsForAllServicesToCSV(month);
         }
