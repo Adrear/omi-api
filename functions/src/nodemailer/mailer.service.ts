@@ -1,6 +1,8 @@
 import nodemailer, { Transporter } from 'nodemailer';
 import { ConfigService } from '@nestjs/config';
+import { Injectable } from '@nestjs/common';
 
+@Injectable()
 export class MailerService {
     private transporter: Transporter;
     private readonly fromAddress: string;

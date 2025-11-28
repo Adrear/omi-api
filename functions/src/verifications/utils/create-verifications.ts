@@ -55,7 +55,6 @@ export async function createVerificationsUtil({
         const exchangeRate = await getExchangeRate();
 
         const limit = pLimit(5);
-        let batch = verificationsCollection.firestore.batch();
         const servicesSnapshot = await servicesCollection.get();
 
         const promises = servicesSnapshot.docs.map((serviceDoc) =>
@@ -121,15 +120,15 @@ export async function createVerificationsUtil({
                 };
 
                 const docRef = verificationsCollection.doc(`${day}_${serviceDoc.id}`);
-                batch.set(docRef, verificationData);
+                await docRef.set(verificationData);
                 await servicesCollection.doc(serviceDoc.id).update({ totalServiceCount });
             })
         );
 
         await Promise.all(promises);
-        await batch.commit();
 
     } catch (error) {
         logger.error('Error in createVerifications:', error);
+        throw error;
     }
 }
