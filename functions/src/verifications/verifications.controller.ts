@@ -1,5 +1,6 @@
-import {Controller, Get, Post, Body, Param, Query} from '@nestjs/common';
+import {Controller, Get, Post, Body, Param, Query, UseGuards} from '@nestjs/common';
 import { VerificationsService } from './verifications.service';
+import { ApiTokenGuard } from '../common/guards/api-token.guard';
 
 @Controller('verifications')
 export class VerificationsController {
@@ -27,11 +28,13 @@ export class VerificationsController {
     // async exportVerificationsToCSV() {
     //     return this.verificationsService.exportVerificationsToCSV('2024-09-04');
     // }
+    @UseGuards(ApiTokenGuard)
     @Get('update')
     async updateVerifications(@Query('source') source: string) {
         return await this.verificationsService.updateVerifications(source);
     }
 
+    @UseGuards(ApiTokenGuard)
     @Get('create-verifications-by-country')
     async createVerificationsByCountriesForMonth() {
         const months = ['2025-10', '2025-11'];
@@ -50,6 +53,7 @@ export class VerificationsController {
     //     return { message: 'There created new collection' };
     // }
 
+    @UseGuards(ApiTokenGuard)
     @Get('export-verifications-by-services')
     async exportVerificationsByServicesForMonth() {
         const months = ['2025-06'];
