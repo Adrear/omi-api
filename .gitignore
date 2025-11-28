@@ -74,6 +74,7 @@ typings/
 .env
 .env.test
 .env.production
+functions/omi-project-52e90-firebase-adminsdk-qnizq-d970e45567.json
 
 # parcel-bundler cache (https://parceljs.org/)
 .cache
