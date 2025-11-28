@@ -15,5 +15,6 @@ export interface Configuration {
         smtp_pass?: string;
         smtp_from?: string;
         admin_api_token?: string;
+        alert_emails?: string[];
     };
 }

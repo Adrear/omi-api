@@ -16,5 +16,9 @@ export default registerAs('app', () => ({
     smtp_user: process.env.SMTP_USER || functions.config().project.smtp_user,
     smtp_pass: process.env.SMTP_PASS || functions.config().project.smtp_pass,
     smtp_from: process.env.SMTP_FROM || functions.config().project.smtp_from || 'contact@cotsi.org',
-    admin_api_token: process.env.ADMIN_API_TOKEN || functions.config().project.admin_api_token
+    admin_api_token: process.env.ADMIN_API_TOKEN || functions.config().project.admin_api_token,
+    alert_emails: (process.env.ALERT_EMAILS || functions.config().project.alert_emails || '')
+        .split(',')
+        .map(email => email.trim())
+        .filter(Boolean)
 }));

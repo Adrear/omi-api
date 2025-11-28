@@ -7,10 +7,11 @@ import { SmsActivateService } from './byService/sms-activate.service';
 import { SmspvaService } from './byService/smspva.service';
 import {HttpModule} from "@nestjs/axios";
 import { ApiTokenGuard } from "../common/guards/api-token.guard";
+import { MailerService } from "../nodemailer/mailer.service";
 
 @Module({
     imports: [HttpModule],
     controllers: [VerificationsController],
-    providers: [VerificationsService, SmshubService, FiveSimService, SmsActivateService, SmspvaService, ApiTokenGuard],
+    providers: [VerificationsService, SmshubService, FiveSimService, SmsActivateService, SmspvaService, ApiTokenGuard, MailerService],
 })
 export class VerificationsModule {}

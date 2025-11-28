@@ -13,6 +13,7 @@ import { SmshubService } from './byService/smshub.service';
 import { FiveSimService } from './byService/5sim.service';
 import { SmsActivateService } from './byService/sms-activate.service';
 import { SmspvaService } from './byService/smspva.service';
+import { ConfigService } from '@nestjs/config';
 import dayjs from 'dayjs';
 import pLimit from 'p-limit';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
@@ -23,6 +24,7 @@ import {CountryDocument} from "../countries/documents/country.document";
 import { Parser } from 'json2csv';
 import * as fs from 'fs';
 import path from "path";
+import { MailerService } from '../nodemailer/mailer.service';
 
 dayjs.extend(customParseFormat);
 interface GetAllVerificationsParams {
@@ -54,6 +56,8 @@ export class VerificationsService {
         private readonly fiveSimService: FiveSimService,
         private readonly smsActivateService: SmsActivateService,
         private readonly smspvaService: SmspvaService,
+        private readonly configService: ConfigService,
+        private readonly mailerService: MailerService,
     ) {}
     async getAllVerifications({ source, date }: GetAllVerificationsParams): Promise<number> {
         return getAllVerificationsUtil({
@@ -73,17 +77,25 @@ export class VerificationsService {
     }
 
     async createVerifications(day: string) {
-        return createVerificationsUtil({
-            day,
-            logger: this.logger,
-            verificationsCollection: this.verificationsCollection,
-            servicesCollection: this.servicesCollection,
-            countriesCollection: this.countriesCollection,
-            smsActivateService: this.smsActivateService,
-            fiveSimService: this.fiveSimService,
-            smspvaService: this.smspvaService,
-            smshubService: this.smshubService,
-        });
+        const exchangeRatesApiKey = this.configService.get<string>('app.exchange_rates_api_key') || '';
+        try {
+            return await createVerificationsUtil({
+                day,
+                logger: this.logger,
+                verificationsCollection: this.verificationsCollection,
+                servicesCollection: this.servicesCollection,
+                countriesCollection: this.countriesCollection,
+                smsActivateService: this.smsActivateService,
+                fiveSimService: this.fiveSimService,
+                smspvaService: this.smspvaService,
+                smshubService: this.smshubService,
+                exchangeRatesApiKey
+            });
+        } catch (error) {
+            this.logger.error('createVerifications failed', error as Error);
+            await this.notifyFailure('createVerifications', error as Error);
+            throw error;
+        }
     }
 
     async getVerificationsByServiceForTimeline(serviceID: string, body: any) {
@@ -467,6 +479,24 @@ export class VerificationsService {
                 this.logger.error('An unknown error occurred');
                 throw new Error('Failed to update verifications due to an unknown error');
             }
+        }
+    }
+
+    private async notifyFailure(context: string, error: Error) {
+        const recipients = this.configService.get<string[]>('app.alert_emails') || [];
+        if (!recipients.length) {
+            this.logger.warn(`Alert emails not configured. Skipping notification for ${context}`);
+            return;
+        }
+
+        const subject = `[omi-api] ${context} failed`;
+        const text = `Context: ${context}\nError: ${error.message}\nStack: ${error.stack ?? 'n/a'}`;
+
+        try {
+            await this.mailerService.sendMail(recipients, subject, text);
+            this.logger.log(`Alert email sent for ${context}`);
+        } catch (mailError) {
+            this.logger.error(`Failed to send alert email for ${context}`, mailError as Error);
         }
     }
 }

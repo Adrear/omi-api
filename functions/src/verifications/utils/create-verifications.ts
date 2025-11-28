@@ -21,6 +21,7 @@ export async function createVerificationsUtil({
                                                   fiveSimService,
                                                   smspvaService,
                                                   smshubService,
+                                                  exchangeRatesApiKey,
                                               }: {
     day: string;
     logger: Logger;
@@ -31,20 +32,23 @@ export async function createVerificationsUtil({
     fiveSimService: any;
     smspvaService: any;
     smshubService: any;
+    exchangeRatesApiKey: string;
 }) {
     try {
         const getExchangeRate = async (): Promise<number> => {
+            if (!exchangeRatesApiKey) {
+                throw new Error('Exchange rates API key is missing');
+            }
             try {
-                const response = await axios.get('https://v6.exchangerate-api.com/v6/cc921650c3cd76ed6d008c04/latest/USD');
+                const response = await axios.get(`https://v6.exchangerate-api.com/v6/${exchangeRatesApiKey}/latest/USD`);
                 const exchangeRate = response.data.conversion_rates?.RUB;
                 if (!exchangeRate) {
-                    logger.warn('Exchange rate RUB to USD not found. Defaulting to 100.');
-                    return 100;
+                    throw new Error('Exchange rate RUB to USD not found');
                 }
                 return exchangeRate;
             } catch (error: any) {
-                logger.error('Failed to fetch exchange rate. Defaulting to 100:', error.message);
-                return 100;
+                logger.error('Failed to fetch exchange rate.', error.message || error);
+                throw error;
             }
         };
 
