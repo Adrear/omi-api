@@ -1,23 +1,26 @@
 import {Timestamp} from "@google-cloud/firestore";
+interface CountryVerification {
+    countryID: string;
+    data: { [day: number]: { count: number | null; priceUSD: number | null } };
+}
 
-export class VerificationDocument {
-    static collectionName = 'verifications';
+export class VerificationByServicesDocument {
+    static collectionName = 'verificationsByServices';
 
-    day: string;
     serviceID: string;
     createdAt?: Timestamp;
-    totalServiceCount: number;
-    [countryID: string]: any; // Динамічні ключі для країн
+    month: string;
+    countries: CountryVerification[];
 
     constructor(
-        day: string,
         serviceID: string,
-        totalServiceCount: number,
+        month: string,
+        countries: CountryVerification[],
         createdAt?: Timestamp
     ) {
-        this.day = day;
         this.serviceID = serviceID;
-        this.totalServiceCount = totalServiceCount;
+        this.month = month;
+        this.countries = countries;
         this.createdAt = createdAt;
     }
 }

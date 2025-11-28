@@ -4,6 +4,7 @@ export class ServiceDocument {
     id: string;
     name: string;
     logo: string;
+    logo_new: string;
     category: string;
     id_activate: string;
     name_activate: string;
@@ -20,6 +21,7 @@ export class ServiceDocument {
         id: string,
         name: string,
         logo: string,
+        logo_new: string,
         category: string,
         id_activate: string,
         name_activate: string,
@@ -35,6 +37,7 @@ export class ServiceDocument {
         this.id = id;
         this.name = name;
         this.logo = logo;
+        this.logo_new = logo_new;
         this.category = category;
         this.id_activate = id_activate;
         this.name_activate = name_activate;

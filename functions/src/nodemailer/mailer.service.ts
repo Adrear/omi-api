@@ -1,23 +1,33 @@
-import nodemailer from 'nodemailer';
+import nodemailer, { Transporter } from 'nodemailer';
+import { ConfigService } from '@nestjs/config';
 
 export class MailerService {
-    private transporter;
+    private transporter: Transporter;
+    private readonly fromAddress: string;
 
-    constructor() {
+    constructor(private readonly configService: ConfigService) {
+        const host = this.configService.get<string>('app.smtp_host');
+        const port = this.configService.get<number>('app.smtp_port');
+        const secure = this.configService.get<boolean>('app.smtp_secure');
+        const user = this.configService.get<string>('app.smtp_user');
+        const pass = this.configService.get<string>('app.smtp_pass');
+
+        if (!host || !port || !user || !pass) {
+            throw new Error('SMTP configuration is missing. Please set SMTP_HOST/SMTP_PORT/SMTP_USER/SMTP_PASS');
+        }
+
+        this.fromAddress = this.configService.get<string>('app.smtp_from') || user;
         this.transporter = nodemailer.createTransport({
-            host: 'mail.privateemail.com',
-            port: 465,
-            secure: true,
-            auth: {
-                user: 'contact@cotsi.org',
-                pass: ',zU(Q0b(?$i04yWUsK4uLo*',
-            },
+            host,
+            port,
+            secure,
+            auth: { user, pass },
         });
     }
 
-    async sendMail(to: string, subject: string, text: string, html?: string) {
-        return await this.transporter.sendMail({
-            from: '"Contact Form" <contact@cotsi.org>',
+    async sendMail(to: string[], subject: string, text: string, html?: string) {
+        return this.transporter.sendMail({
+            from: `"Contact Form" <${this.fromAddress}>`,
             to,
             subject,
             text,

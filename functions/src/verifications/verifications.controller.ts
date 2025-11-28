@@ -9,20 +9,12 @@ export class VerificationsController {
     async getAllVerifications(@Query() query: { source?: string, date?: string }) {
         return this.verificationsService.getAllVerifications(query);
     }
-    @Get('service/:serviceId')
-    async getVerificationsByService(@Param('serviceId') serviceId: string) {
-        return this.verificationsService.getLastVerificationsByService(serviceId);
-    }
     @Post('service/:serviceId/timeline')
     async getVerificationsByServiceForTimeline(
         @Param('serviceId') serviceId: string,
         @Body() body: any
     ) {
         return this.verificationsService.getVerificationsByServiceForTimeline(serviceId, body);
-    }
-    @Get('country/:countryId')
-    async getVerificationsByCountry(@Param('countryId') countryId: string) {
-        return this.verificationsService.getLastVerificationsByCountry(countryId);
     }
     @Post('country/:countryId/timeline')
     async getVerificationsByCountryForTimeline(
@@ -42,15 +34,33 @@ export class VerificationsController {
 
     @Get('create-verifications-by-country')
     async createVerificationsByCountriesForMonth() {
-        const months = ['2024-12'];
+        const months = ['2025-10', '2025-11'];
         for (const month of months) {
             await this.verificationsService.createVerificationsByCountriesForMonth(month);
         }
         return { message: 'There created new collection' };
     }
 
-    @Get('update-country-indexes')
-    async updateCountryIndexes(@Query('day') day: string) {
-        return await this.verificationsService.updateCountryIndexes(day);
+    // @Get('create-verifications-by-services')
+    // async createVerificationsByServicesForMonth() {
+    //     const months = ['2024-12', '2025-01', '2025-02', '2024-09'];
+    //     for (const month of months) {
+    //         await this.verificationsService.createVerificationsForAllServices(month);
+    //     }
+    //     return { message: 'There created new collection' };
+    // }
+
+    @Get('export-verifications-by-services')
+    async exportVerificationsByServicesForMonth() {
+        const months = ['2025-06'];
+        for (const month of months) {
+            await this.verificationsService.exportVerificationsForAllServicesToCSV(month);
+        }
+        return { message: 'There created new collection' };
     }
+
+    // @Get('update-country-indexes')
+    // async updateCountryIndexes(@Query('day') day: string) {
+    //     return await this.verificationsService.updateCountryIndexes(day);
+    // }
 }

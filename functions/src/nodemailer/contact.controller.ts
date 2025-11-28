@@ -2,12 +2,14 @@ import { Controller, Post, Body } from '@nestjs/common';
 import { MailerService } from './mailer.service';
 import { HttpService } from '@nestjs/axios';
 import {firstValueFrom} from 'rxjs';
+import { ConfigService } from '@nestjs/config';
 
 @Controller('contact')
 export class ContactController {
     constructor(
         private readonly httpService: HttpService,
-        private readonly mailerService: MailerService
+        private readonly mailerService: MailerService,
+        private readonly configService: ConfigService
     ) {}
 
     @Post()
@@ -17,8 +19,7 @@ export class ContactController {
         const { name, email, organisation, message, recaptcha } = body;
 
         try {
-            // Перевірка reCAPTCHA
-            const recaptchaSecret = 'YOUR_SECRET_KEY'; // Ваш секретний ключ reCAPTCHA
+            const recaptchaSecret = this.configService.get<string>('app.recaptcha_secret_key');
             const verificationUrl = `https://www.google.com/recaptcha/api/siteverify`;
 
             const response = await firstValueFrom(
@@ -48,7 +49,15 @@ export class ContactController {
                 <p><strong>Message:</strong> ${message}</p>
             `;
 
-            await this.mailerService.sendMail('kirillmanakhov2306@gmail.com', subject, text, html);
+            const maillist = [
+                'kirillmanakhov2306@gmail.com',
+                'contact@cotsi.org',
+                'jjr51@cam.ac.uk',
+                'yk408@cam.ac.uk',
+                'a.dek@jbs.cam.ac.uk'
+            ];
+
+            await this.mailerService.sendMail(maillist, subject, text, html);
 
             return { success: true, message: 'Message sent successfully!' };
         } catch (error) {

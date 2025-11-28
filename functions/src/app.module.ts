@@ -6,6 +6,8 @@ import { VerificationsModule } from './verifications/verifications.module';
 import {ServicesModule} from "./services/services.module";
 import {CountriesModule} from "./countries/countries.module";
 import { ContactModule } from './nodemailer/contact.module';
+import {ExchangeRatesModule } from "./exchange-rates/exchange-rates.module";
+
 @Module({
     imports: [
         ConfigModule.forRoot({
@@ -22,7 +24,8 @@ import { ContactModule } from './nodemailer/contact.module';
         VerificationsModule,
         ServicesModule,
         CountriesModule,
-        ContactModule
+        ContactModule,
+        ExchangeRatesModule
     ],
     controllers: [],
     providers: [],

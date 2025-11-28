@@ -1,10 +1,13 @@
-import { VerificationDocument, SmsActivateVerificationDocument, FiveSimVerificationDocument, SmshubVerificationDocument, SmspvaVerificationDocument } from '../verifications/documents/index.document';
+import { VerificationDocument, VerificationByServicesDocument, SmsActivateVerificationDocument, FiveSimVerificationDocument, SmshubVerificationDocument, SmspvaVerificationDocument } from '../verifications/documents/index.document';
 import {ServiceDocument, SmsActivateServiceDocument, FiveSimServiceDocument, SmshubServiceDocument, SmspvaServiceDocument, SimsmsServiceDocument} from "../services/documents/index.document";
 import {CountryDocument, SmsActivateCountryDocument, FiveSimCountryDocument, SmshubCountryDocument, SmspvaCountryDocument, SimsmsCountryDocument} from "../countries/documents/index.document";
+import { ExchangeRatesDocument } from "../exchange-rates/documents/index.document";
+
 export const FirestoreDatabaseProvider = 'firestoredb';
 export const FirestoreOptionsProvider = 'firestoreOptions'
 export const FirestoreCollectionProviders: string[] = [
     VerificationDocument.collectionName,
+    VerificationByServicesDocument.collectionName,
     ServiceDocument.collectionName,
     CountryDocument.collectionName,
     SmsActivateVerificationDocument.collectionName,
@@ -20,5 +23,6 @@ export const FirestoreCollectionProviders: string[] = [
     SmspvaServiceDocument.collectionName,
     SmspvaCountryDocument.collectionName,
     SimsmsCountryDocument.collectionName,
-    SimsmsServiceDocument.collectionName
+    SimsmsServiceDocument.collectionName,
+    ExchangeRatesDocument.collectionName
 ];

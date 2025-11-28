@@ -1,53 +1,59 @@
-import {CollectionReference, Timestamp, Query} from '@google-cloud/firestore';
-import dayjs from 'dayjs';
-import {Logger} from '@nestjs/common';
-import {VerificationDocument} from '../documents/index.document';
-import {SmsActivateVerificationDocument, FiveSimVerificationDocument} from '../documents/index.document';
-import customParseFormat from 'dayjs/plugin/customParseFormat';
+import { CollectionReference } from '@google-cloud/firestore';
+import { VerificationDocument } from '../documents/index.document';
+import { Logger } from '@nestjs/common';
+import { Parser } from 'json2csv';
+import * as fs from 'fs';
 
-dayjs.extend(customParseFormat);
-
-interface GetAllVerificationsParams {
-    source?: string;
-    date?: string;
-}
-
-export async function getAllVerificationsUtil({
-                                                  source,
-                                                  date,
-                                                  logger,
-                                                  verificationsCollection
-                                              }: {
-    source?: string;
-    date?: string;
-    logger: Logger;
+export async function exportVerificationsToCSVUtil({
+                                                       day,
+                                                       verificationsCollection,
+                                                       logger,
+                                                   }: {
+    day: string;
     verificationsCollection: CollectionReference<VerificationDocument>;
-}): Promise<number> {
-    let collection: CollectionReference<VerificationDocument> | CollectionReference<SmsActivateVerificationDocument> | CollectionReference<FiveSimVerificationDocument>;
+    logger: Logger;
+}) {
+    try {
+        const verificationsSnapshot = await verificationsCollection.where('day', '==', day).get();
 
-    if (source === 'sms-activate') {
-        return 0; // Можна реалізувати логіку, якщо потрібно
-    } else if (source === '5sim') {
-        return 0; // Можна реалізувати логіку, якщо потрібно
-    } else {
-        collection = verificationsCollection;
-    }
-
-    let query: Query<VerificationDocument> | Query<SmsActivateVerificationDocument> | Query<FiveSimVerificationDocument> = collection;
-
-    if (date) {
-        const dateObj = dayjs(date, 'DD-MM-YYYY');
-        if (!dateObj.isValid()) {
-            throw new Error(`Invalid date format: ${date}`);
+        if (verificationsSnapshot.empty) {
+            logger.log(`No verifications found for day: ${day}`);
+            return;
         }
-        const startOfDay = Timestamp.fromDate(dateObj.startOf('day').toDate());
-        const endOfDay = Timestamp.fromDate(dateObj.endOf('day').toDate());
-        query = query.where('date', '>=', startOfDay).where('date', '<=', endOfDay);
+
+        const verificationsData: any[] = [];
+
+        verificationsSnapshot.docs.forEach((doc) => {
+            const data = doc.data();
+            const verificationEntry: { [key: string]: any } = {
+                id: doc.id,
+                day: data.day,
+                serviceID: data.serviceID,
+                totalServiceCount: data.totalServiceCount,
+                verificationsFor100USD: data.verificationsFor100USD,
+                createdAt: data.createdAt && data.createdAt.toDate().toISOString(),
+            };
+
+            Object.keys(data).forEach((key) => {
+                if (
+                    !['day', 'serviceID', 'totalServiceCount', 'verificationsFor100USD', 'createdAt'].includes(key)
+                ) {
+                    verificationEntry[`${key}_priceUSD`] = data[key]?.priceUSD || 0;
+                    verificationEntry[`${key}_count`] = data[key]?.count || 0;
+                }
+            });
+
+            verificationsData.push(verificationEntry);
+        });
+
+        const json2csvParser = new Parser();
+        const csv = json2csvParser.parse(verificationsData);
+
+        const filePath = `verifications_${day}.csv`;
+        fs.writeFileSync(filePath, csv);
+
+        logger.log(`CSV file created: ${filePath}`);
+    } catch (error) {
+        logger.error('Error exporting verifications to CSV:', error);
     }
-
-    logger.debug(`Executing query with date: ${date}`);
-    const snapshot = await query.get();
-    logger.debug(`Query returned ${snapshot.docs.length} documents`);
-
-    return snapshot.docs.length;
 }

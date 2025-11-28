@@ -21,6 +21,7 @@
     "@nestjs/platform-express": "^10.3.10",
     "@types/lodash": "^4.17.7",
     "axios": "^1.7.9",
+    "colorthief": "^2.6.0",
     "cors": "^2.8.5",
     "dayjs": "^1.11.11",
     "dotenv": "^16.4.5",
@@ -33,6 +34,7 @@
     "tsconfig-paths": "^4.2.0"
   },
   "devDependencies": {
+    "@types/json2csv": "^5.0.7",
     "@types/node": "^20.14.10",
     "firebase-functions-test": "^3.1.0",
     "ts-node": "^10.9.2",

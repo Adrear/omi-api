@@ -30,7 +30,7 @@ export class FiveSimService {
             .where('date', '<=', finishDate)
             .where('service_code', '==', service_code)
             .get();
-        const smspvaDocs = verificationsSnapshot.docs.map(doc => {
+        const fiveSimDocs = verificationsSnapshot.docs.map(doc => {
             const { price, count } = calculateAveragePriceAndCountFiveSim(doc.data().price_info)
             return {
                 day,
@@ -41,7 +41,7 @@ export class FiveSimService {
                 source: doc.data().source
             }
         })
-        return _.uniqBy(smspvaDocs, 'country');
+        return _.uniqBy(fiveSimDocs, 'country');
     }
     public async addFiveSimVerifications(part?: string) {
         const batchLimit = 100;

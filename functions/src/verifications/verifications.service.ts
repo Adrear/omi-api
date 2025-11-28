@@ -1,6 +1,14 @@
-import {Inject, Injectable, Logger} from '@nestjs/common';
-import {CollectionReference, Timestamp, Query} from '@google-cloud/firestore';
-import {VerificationDocument, SmsActivateVerificationDocument, FiveSimVerificationDocument} from './documents/index.document';
+import { Inject, Injectable, Logger } from '@nestjs/common';
+import { CollectionReference, Timestamp } from '@google-cloud/firestore';
+import { VerificationDocument, VerificationByServicesDocument } from './documents/index.document';
+import {
+    getAllVerificationsUtil,
+    exportVerificationsToCSVUtil,
+    createVerificationsUtil,
+    getVerificationsByServiceForTimelineUtil,
+    getVerificationsByCountryForTimelineUtil
+} from './utils';
+import { ExchangeRatesDocument } from "../exchange-rates/documents/exchange-rates.document";
 import { SmshubService } from './byService/smshub.service';
 import { FiveSimService } from './byService/5sim.service';
 import { SmsActivateService } from './byService/sms-activate.service';
@@ -14,17 +22,12 @@ import {CountryDocument} from "../countries/documents/country.document";
 // @ts-ignore
 import { Parser } from 'json2csv';
 import * as fs from 'fs';
-import axios from 'axios';
+import path from "path";
 
 dayjs.extend(customParseFormat);
 interface GetAllVerificationsParams {
     source?: string;
     date?: string;
-}
-
-interface VerificationEntry {
-    priceUSD: number;
-    count: number;
 }
 
 function getDocumentSize(doc: any): number {
@@ -39,337 +42,187 @@ export class VerificationsService {
     constructor(
         @Inject(VerificationDocument.collectionName)
         private verificationsCollection: CollectionReference<VerificationDocument>,
+        @Inject(VerificationByServicesDocument.collectionName)
+        private verificationsByServicesCollection: CollectionReference<VerificationByServicesDocument>,
         @Inject(ServiceDocument.collectionName)
         private servicesCollection: CollectionReference<ServiceDocument>,
         @Inject(CountryDocument.collectionName)
         private countriesCollection: CollectionReference<CountryDocument>,
+        @Inject(ExchangeRatesDocument.collectionName)
+        private exchangeRatesCollection: CollectionReference<ExchangeRatesDocument>,
         private readonly smshubService: SmshubService,
         private readonly fiveSimService: FiveSimService,
         private readonly smsActivateService: SmsActivateService,
         private readonly smspvaService: SmspvaService,
     ) {}
     async getAllVerifications({ source, date }: GetAllVerificationsParams): Promise<number> {
-        let collection: CollectionReference<VerificationDocument> | CollectionReference<SmsActivateVerificationDocument> | CollectionReference<FiveSimVerificationDocument>;
-
-        if (source === 'sms-activate') {
-            // collection = this.smsActivateVerificationsCollection;
-            return 0
-        } else if (source === '5sim') {
-            // collection = this.fiveSimVerificationsCollection;
-            return 0
-        } else {
-            collection = this.verificationsCollection;
-        }
-
-        let query: Query<VerificationDocument> | Query<SmsActivateVerificationDocument> | Query<FiveSimVerificationDocument> = collection;
-
-        if (date) {
-            const dateObj = dayjs(date, 'DD-MM-YYYY');
-            if (!dateObj.isValid()) {
-                throw new Error(`Invalid date format: ${date}`);
-            }
-            const startOfDay = Timestamp.fromDate(dateObj.startOf('day').toDate());
-            const endOfDay = Timestamp.fromDate(dateObj.endOf('day').toDate());
-            query = query.where('date', '>=', startOfDay).where('date', '<=', endOfDay);
-        }
-
-        this.logger.debug(`Executing query with date: ${date}`);
-        const snapshot = await query.get();
-        this.logger.debug(`Query returned ${snapshot.docs.length} documents`);
-        return snapshot.docs.length;
+        return getAllVerificationsUtil({
+            source,
+            date,
+            verificationsCollection: this.verificationsCollection,
+            logger: this.logger
+        });
     }
 
     async exportVerificationsToCSV(day: string) {
-        try {
-            const verificationsSnapshot = await this.verificationsCollection.where('day', '==', day).get();
-
-            if (verificationsSnapshot.empty) {
-                this.logger.log(`No verifications found for day: ${day}`);
-                return;
-            }
-
-            const verificationsData: any[] = [];
-
-            verificationsSnapshot.docs.forEach((doc) => {
-                const data = doc.data();
-                const verificationEntry: { [key: string]: any } = {
-                    id: doc.id,
-                    day: data.day,
-                    serviceID: data.serviceID,
-                    totalServiceCount: data.totalServiceCount,
-                    verificationsFor100USD: data.verificationsFor100USD,
-                    createdAt: data.createdAt && data.createdAt.toDate().toISOString(),
-                };
-
-                // Додаємо дані по країнам, якщо є
-                Object.keys(data).forEach((key) => {
-                    if (key !== 'day' && key !== 'serviceID' && key !== 'totalServiceCount' && key !== 'verificationsFor100USD' && key !== 'createdAt') {
-                        verificationEntry[`${key}_priceUSD`] = data[key]?.priceUSD || 0;
-                        verificationEntry[`${key}_count`] = data[key]?.count || 0;
-                    }
-                });
-
-                verificationsData.push(verificationEntry);
-            });
-
-            const json2csvParser = new Parser();
-            const csv = json2csvParser.parse(verificationsData);
-
-            const filePath = `verifications_${day}.csv`;
-            fs.writeFileSync(filePath, csv);
-
-            this.logger.log(`CSV file created: ${filePath}`);
-
-        } catch (error) {
-            this.logger.error('Error exporting verifications to CSV:', error);
-        }
+        return exportVerificationsToCSVUtil({
+            day,
+            verificationsCollection: this.verificationsCollection,
+            logger: this.logger
+        });
     }
 
     async createVerifications(day: string) {
-        try {
-            const getExchangeRate = async (): Promise<number> => {
-                try {
-                    const response = await axios.get('https://v6.exchangerate-api.com/v6/cc921650c3cd76ed6d008c04/latest/USD');
-                    const exchangeRate = response.data.conversion_rates?.RUB;
-                    if (!exchangeRate) {
-                        this.logger.warn('Exchange rate RUB to USD not found. Defaulting to 100.');
-                        return 100;
-                    }
-                    return exchangeRate;
-                } catch (error: any) {
-                    this.logger.error('Failed to fetch exchange rate. Defaulting to 100:', error.message);
-                    return 100;
-                }
-            };
-
-            const exchangeRate = await getExchangeRate();
-
-            const limit = pLimit(5);
-            let batch = this.verificationsCollection.firestore.batch();
-            const servicesSnapshot = await this.servicesCollection.get();
-
-            const promises = servicesSnapshot.docs.map((serviceDoc) => limit(async () => {
-                this.logger.log(serviceDoc.id);
-
-                const [smsActivateDocs, fiveSimDocs, smspvaDocs, smshubDocs] = await Promise.all([
-                    serviceDoc.data().id_activate ? this.smsActivateService.getVerificationsByDayAndService({
-                        day: day,
-                        service_code: serviceDoc.data().id_activate
-                    }) : Promise.resolve([]),
-                    serviceDoc.data().id_5sim ? this.fiveSimService.getVerificationsByDayAndService({
-                        day: day,
-                        service_code: serviceDoc.data().id_5sim
-                    }) : Promise.resolve([]),
-                    serviceDoc.data().id_smspva ? this.smspvaService.getVerificationsByDayAndService({
-                        day: day,
-                        service_code: serviceDoc.data().id_smspva
-                    }) : Promise.resolve([]),
-                    serviceDoc.data().id_smshub ? this.smshubService.getVerificationsByDayAndService({
-                        day: day,
-                        service_code: serviceDoc.data().id_smshub
-                    }) : Promise.resolve([])
-                ]);
-
-                const countriesSnapshot = await this.countriesCollection.get();
-                const verification: { [countryId: string]: VerificationEntry } = {};
-                let totalServiceCount = 0;
-                let verificationsFor100USD = 0;
-
-                for (const countryDoc of countriesSnapshot.docs) {
-                    const smsActivateDoc = smsActivateDocs.find(el => el.country === countryDoc.data().id_activate);
-                    const fiveSimDoc = fiveSimDocs.find(el => el.country === countryDoc.data().id_5sim);
-                    const smspvaDoc = smspvaDocs.find(el => el.country === countryDoc.data().id_smspva);
-                    const smshubDoc = smshubDocs.find(el => el.country === countryDoc.data().id_smshub);
-
-                    const totalCount = (smsActivateDoc?.count || 0) + (fiveSimDoc?.count || 0) + (smspvaDoc?.count || 0) + (smshubDoc?.count || 0);
-
-                    const countryPrice = (
-                        ((smsActivateDoc?.price || 0) / exchangeRate * (smsActivateDoc?.count || 0)) +
-                        ((fiveSimDoc?.price || 0) / exchangeRate * (fiveSimDoc?.count || 0)) +
-                        ((smspvaDoc?.price || 0) * (smspvaDoc?.count || 0)) +
-                        ((smshubDoc?.price || 0) * (smshubDoc?.count || 0))
-                    ) / totalCount;
-
-                    if (totalCount > 0) {
-                        verification[countryDoc.id] = {
-                            priceUSD: countryPrice,
-                            count: totalCount
-                        };
-                        totalServiceCount += totalCount;
-                        verificationsFor100USD += (100 / countryPrice) * totalCount;
-                    }
-                }
-
-                const verificationData = {
-                    day: day,
-                    createdAt: Timestamp.now(),
-                    serviceID: serviceDoc.id,
-                    totalServiceCount,
-                    verificationsFor100USD,
-                    ...verification
-                };
-
-                const docRef = this.verificationsCollection.doc(`${day}_${serviceDoc.id}`);
-                batch.set(docRef, verificationData);
-                await this.servicesCollection.doc(serviceDoc.id).update({ totalServiceCount });
-            }));
-
-            await Promise.all(promises);
-            await batch.commit();
-
-        } catch (error) {
-            this.logger.error('Error in createVerifications:', error);
-        }
-    }
-    async getVerificationsByServiceForTimeline (serviceID: string, body: any) {
-        const servicesSnapshot = await this.verificationsCollection
-            .where('serviceID', '==', serviceID)
-            .orderBy('day', 'desc')
-            .limit(5)
-            .get();
-        return servicesSnapshot.docs.map(el => el.data());
+        return createVerificationsUtil({
+            day,
+            logger: this.logger,
+            verificationsCollection: this.verificationsCollection,
+            servicesCollection: this.servicesCollection,
+            countriesCollection: this.countriesCollection,
+            smsActivateService: this.smsActivateService,
+            fiveSimService: this.fiveSimService,
+            smspvaService: this.smspvaService,
+            smshubService: this.smshubService,
+        });
     }
 
-    async getLastVerificationsByService(serviceID: string) {
-        const servicesSnapshot = await this.verificationsCollection
-            .where('serviceID', '==', serviceID)
-            .orderBy('day', 'desc')
-            .limit(1)
-            .get();
-        return servicesSnapshot.docs.map(el => el.data())[0];
+    async getVerificationsByServiceForTimeline(serviceID: string, body: any) {
+        return getVerificationsByServiceForTimelineUtil({
+            serviceID,
+            verificationsCollection: this.verificationsCollection,
+            limit: 5
+        });
     }
 
     async getVerificationsByCountryForTimeline(countryID: string, body: any) {
+        const { services, days } = body;
+        return getVerificationsByCountryForTimelineUtil({
+            countryID,
+            services,
+            days,
+            verificationsCollection: this.verificationsCollection,
+            logger: this.logger
+        });
+    }
+    async createVerificationsByServiceForMonth(serviceID: string, month: string) {
         try {
-            const { services, days } = body;
-            const transformedData: { [key: string]: any } = {
-                countryID: countryID,
-                days: []
-            };
+            const batchSizeLimit = 500;
+            let batch = this.verificationsByServicesCollection.firestore.batch();
+            let batchOperationCount = 0;
 
-            for (let i = 1; i < days+1; i++) {
-                const currentDay = this.getDateNDaysAgo(i);
-                const countryVerificationsSnapshot = await this.verificationsCollection
-                    .where('day', '==', currentDay)
-                    .where('serviceID', 'in', services)
-                    .get();
+            const serviceDoc = await this.servicesCollection.doc(serviceID).get();
+            if (!serviceDoc.exists) {
+                this.logger.warn(`Service ${serviceID} not found.`);
+                return;
+            }
+            const serviceData = serviceDoc.data();
+            this.logger.log(`Processing service: ${serviceID}`);
 
-                if (!countryVerificationsSnapshot.empty) {
-                    const dayData: { [key: string]: any } = {
-                        day: currentDay,
-                    };
+            const exchangeRatesSnapshot = await this.exchangeRatesCollection.get();
+            const exchangeRatesMap: Record<string, number> = {};
+            exchangeRatesSnapshot.forEach(doc => {
+                exchangeRatesMap[doc.id] = doc.data()?.RUB ?? 100;
+            });
 
-                    countryVerificationsSnapshot.docs.forEach(doc => {
-                        const data = doc.data() as VerificationDocument;
-                        const serviceID = data.serviceID;
-                        if (data[countryID] && data[countryID].count > 0) {
-                            dayData[serviceID] = data[countryID];
+            const countriesSnapshot = await this.countriesCollection.get();
+            const countriesData = countriesSnapshot.docs.map(doc => ({
+                id: doc.id,
+                id_activate: doc.data().id_activate,
+                id_5sim: doc.data().id_5sim,
+                id_smspva: doc.data().id_smspva,
+                id_smshub: doc.data().id_smshub
+            }));
+
+            const verificationsByCountry: Record<string, { data: Record<number, { count: number | null; priceUSD: number | null }> }> = {};
+            const daysInMonth = new Date(parseInt(month.split('-')[0]), parseInt(month.split('-')[1]), 0).getDate();
+
+            const allDaysPromises = Array.from({ length: daysInMonth }, (_, i) => i + 1).map(async (day) => {
+                const dayStr = `${month}-${day.toString().padStart(2, '0')}`;
+                const exchangeRate = exchangeRatesMap[dayStr] ?? 100;
+
+                const [smsActivateData, fiveSimData, smspvaData, smshubData] = await Promise.all([
+                    serviceData?.id_activate ? this.smsActivateService.getVerificationsByDayAndService({ day: dayStr, service_code: serviceData.id_activate }) : Promise.resolve([]),
+                    serviceData?.id_5sim ? this.fiveSimService.getVerificationsByDayAndService({ day: dayStr, service_code: serviceData.id_5sim }) : Promise.resolve([]),
+                    serviceData?.id_smspva ? this.smspvaService.getVerificationsByDayAndService({ day: dayStr, service_code: serviceData.id_smspva }) : Promise.resolve([]),
+                    serviceData?.id_smshub ? this.smshubService.getVerificationsByDayAndService({ day: dayStr, service_code: serviceData.id_smshub }) : Promise.resolve([])
+                ]);
+
+                const smsActivateMap = Object.fromEntries(smsActivateData.map(el => [el.country, el]));
+                const fiveSimMap = Object.fromEntries(fiveSimData.map(el => [el.country, el]));
+                const smspvaMap = Object.fromEntries(smspvaData.map(el => [el.country, el]));
+                const smshubMap = Object.fromEntries(smshubData.map(el => [el.country, el]));
+
+                for (const country of countriesData) {
+                    const smsActivateDoc = smsActivateMap[country.id_activate];
+                    const fiveSimDoc = fiveSimMap[country.id_5sim];
+                    const smspvaDoc = smspvaMap[country.id_smspva];
+                    const smshubDoc = smshubMap[country.id_smshub];
+
+                    const totalCount = (smsActivateDoc?.count ?? 0) +
+                        (fiveSimDoc?.count ?? 0) +
+                        (smspvaDoc?.count ?? 0) +
+                        (smshubDoc?.count ?? 0);
+
+                    const countryPrice = (
+                        ((smsActivateDoc?.price ?? 0) / exchangeRate * (smsActivateDoc?.count ?? 0)) +
+                        ((fiveSimDoc?.price ?? 0) / exchangeRate * (fiveSimDoc?.count ?? 0)) +
+                        ((smspvaDoc?.price ?? 0) * (smspvaDoc?.count ?? 0)) +
+                        ((smshubDoc && smshubDoc.price != null && smshubDoc.count != null ? smshubDoc.price * smshubDoc.count : 0))
+                    ) / (totalCount || 1);
+
+                    if (totalCount > 0 || countryPrice > 0) {
+                        if (!verificationsByCountry[country.id]) {
+                            verificationsByCountry[country.id] = { data: {} };
                         }
-                    });
 
-                    transformedData.days.push(dayData);
-                }
-            }
-
-            return transformedData.days.length > 0 ? transformedData : null;
-
-        } catch (error) {
-            this.logger.error('Error in getVerificationsByCountryForTimeline:', error);
-            throw error;
-        }
-    }
-
-    private getDateNDaysAgo(n: number): string {
-        const date = new Date();
-        date.setDate(date.getDate() - n);
-        return this.formatDateToString(date);
-    }
-
-    private formatDateToString(date: Date): string {
-        const yyyy = date.getFullYear();
-        const mm = String(date.getMonth() + 1).padStart(2, '0'); // Січень - 0!
-        const dd = String(date.getDate()).padStart(2, '0');
-        return `${yyyy}-${mm}-${dd}`;
-    }
-
-
-    async getLastVerificationsByCountry(countryID: string) {
-        try {
-            const latestDaySnapshot = await this.verificationsCollection
-                .orderBy('day', 'desc')
-                .limit(1)
-                .get();
-
-            if (latestDaySnapshot.empty) {
-                this.logger.log('No verifications found in the collection.');
-                return null;
-            }
-
-            const latestDay = latestDaySnapshot.docs[0].data().day;
-            this.logger.debug(`Latest day found: ${latestDay}`);
-
-            const countryVerificationsSnapshot = await this.verificationsCollection
-                .where('day', '==', latestDay)
-                .get();
-
-            if (countryVerificationsSnapshot.empty) {
-                this.logger.log(`No verifications found for the latest day: ${latestDay}`);
-                return null;
-            }
-
-            const transformedData: { [key: string]: any } = {
-                createdAt: null,
-                day: latestDay,
-                countryID: countryID
-            };
-
-            countryVerificationsSnapshot.docs.forEach(doc => {
-                const data = doc.data() as VerificationDocument;
-                const serviceID = data.serviceID;
-                if (data[countryID] && data[countryID].count > 0) {
-                    transformedData.createdAt = data.createdAt || transformedData.createdAt;
-                    transformedData[serviceID] = data[countryID];
+                        verificationsByCountry[country.id].data[day - 1] = {
+                            count: totalCount || null,
+                            priceUSD: totalCount > 0 ? countryPrice : null
+                        };
+                    }
                 }
             });
 
-            return transformedData;
+            await Promise.all(allDaysPromises);
 
+            const verificationData = {
+                serviceID,
+                createdAt: Timestamp.now(),
+                month,
+                countries: Object.entries(verificationsByCountry)
+                    .map(([countryID, value]) => ({
+                        countryID,
+                        data: Object.fromEntries(
+                            Object.entries(value.data).filter(([, { count, priceUSD }]) => count !== null || priceUSD !== null)
+                        )
+                    }))
+            };
+
+            const docRef = this.verificationsByServicesCollection.doc(`${month}_${serviceID}`);
+            batch.set(docRef, verificationData);
+            batchOperationCount++;
+
+            const totalServiceCount = verificationData.countries.reduce((acc, cur) => {
+                return acc + Object.values(cur.data).reduce((sum, d) => sum + (d.count ?? 0), 0);
+            }, 0);
+
+            batch.update(this.servicesCollection.doc(serviceID), { totalServiceCount });
+            batchOperationCount++;
+
+            if (batchOperationCount >= batchSizeLimit) {
+                await batch.commit();
+                this.logger.log('Batch committed (limit reached). Creating new batch.');
+                batch = this.verificationsByServicesCollection.firestore.batch();
+                batchOperationCount = 0;
+            }
+
+            await batch.commit();
+            this.logger.log(`Дані для сервісу ${serviceID} успішно записані.`);
         } catch (error) {
-            this.logger.error('Error in getLastVerificationsByCountry:', error);
-            throw error;
+            this.logger.error('Error in createVerificationsByServiceForMonth:', error);
         }
     }
 
-    async updateCountryIndexes(day: string) {
-        try {
-            const verificationsSnapshot = await this.verificationsCollection
-                .where('day', '==', day)
-                .get();
-
-            const countriesSnapshot = await this.countriesCollection
-                .where('not_used', '==', false)
-                .get();
-
-            if (verificationsSnapshot.empty) {
-                return null;
-            }
-            for (const countryDoc of countriesSnapshot.docs) {
-                let totalCountryCount = 0
-                verificationsSnapshot.docs.forEach(verificationDoc => {
-                    const data = verificationDoc.data() as VerificationDocument;
-                    if (data[countryDoc.id] && data[countryDoc.id].count > 0) {
-                        totalCountryCount += data[countryDoc.id].count;
-                    }
-                });
-
-                await this.countriesCollection.doc(countryDoc.id).update({ totalCountryCount });
-            }
-            return 'finish'
-        } catch (error) {
-            this.logger.error('Error in getLastVerificationsByCountry:', error);
-            throw error;
-        }
-    }
     async createVerificationsByCountriesForMonth(month: string) {
         try {
             if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(month)) {
@@ -451,6 +304,124 @@ export class VerificationsService {
         }
     }
 
+    async exportVerificationsForAllServicesToCSV(month: string) {
+        try {
+            const servicesSnapshot = await this.servicesCollection.get();
+            if (servicesSnapshot.empty) {
+                this.logger.warn('No services found.');
+                return;
+            }
+            const filePath = path.join(process.cwd(), `verifications_${month}.csv`);
+
+            const stream = fs.createWriteStream(filePath, { flags: 'w' });
+            stream.write('date,serviceID,serviceName,countryID,exchangeRate,count,priceUSD,smspva_count,smspva_priceUSD,smshub_count,smshub_priceUSD,sms_activate_count,sms_activate_priceRUB,5sim_count,5sim_priceRUB\n');
+
+            const limit = pLimit(5); // Запускати не більше 5 потоків одночасно
+
+            await Promise.all(
+                servicesSnapshot.docs.map(serviceDoc =>
+                    limit(() => this.exportVerificationsByServiceToCSV(serviceDoc.id, month, stream))
+                )
+            );
+
+            // for (const serviceDoc of servicesSnapshot.docs) {
+            //     const serviceID = serviceDoc.id;
+            //     this.logger.log(`Processing service: ${serviceID}`);
+            //     await this.exportVerificationsByServiceToCSV(serviceID, month, stream);
+            // }
+
+            stream.end();
+            this.logger.log(`CSV file created successfully: ${filePath}`);
+        } catch (error) {
+            this.logger.error('Error in exportVerificationsForAllServicesToCSV:', error);
+        }
+    }
+
+    async exportVerificationsByServiceToCSV(serviceID: string, month: string, stream: fs.WriteStream) {
+        try {
+            const serviceDoc = await this.servicesCollection.doc(serviceID).get();
+            if (!serviceDoc.exists) {
+                this.logger.warn(`Service ${serviceID} not found.`);
+                return;
+            }
+            const serviceData = serviceDoc.data();
+
+            const exchangeRatesSnapshot = await this.exchangeRatesCollection.get();
+            const exchangeRatesMap: Record<string, number> = {};
+            exchangeRatesSnapshot.forEach(doc => {
+                exchangeRatesMap[doc.id] = doc.data()?.RUB ?? 100;
+            });
+
+            const countriesSnapshot = await this.countriesCollection
+                .where('not_used', '==', false)
+                .get();
+            const countriesData = countriesSnapshot.docs.map(doc => ({
+                id: doc.id,
+                id_activate: doc.data().id_activate,
+                id_5sim: doc.data().id_5sim,
+                id_smspva: doc.data().id_smspva,
+                id_smshub: doc.data().id_smshub
+            }));
+
+            const daysInMonth = new Date(parseInt(month.split('-')[0]), parseInt(month.split('-')[1]), 0).getDate();
+
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dayStr = `${month}-${day.toString().padStart(2, '0')}`;
+                const exchangeRate = exchangeRatesMap[dayStr] ?? 100;
+
+                const [smsActivateData, fiveSimData, smspvaData, smshubData] = await Promise.all([
+                    serviceData?.id_activate ? this.smsActivateService.getVerificationsByDayAndService({ day: dayStr, service_code: serviceData.id_activate }) : Promise.resolve([]),
+                    serviceData?.id_5sim ? this.fiveSimService.getVerificationsByDayAndService({ day: dayStr, service_code: serviceData.id_5sim }) : Promise.resolve([]),
+                    serviceData?.id_smspva ? this.smspvaService.getVerificationsByDayAndService({ day: dayStr, service_code: serviceData.id_smspva }) : Promise.resolve([]),
+                    serviceData?.id_smshub ? this.smshubService.getVerificationsByDayAndService({ day: dayStr, service_code: serviceData.id_smshub }) : Promise.resolve([])
+                ]);
+
+                const smsActivateMap = Object.fromEntries(smsActivateData.map(el => [el.country, el]));
+                const fiveSimMap = Object.fromEntries(fiveSimData.map(el => [el.country, el]));
+                const smspvaMap = Object.fromEntries(smspvaData.map(el => [el.country, el]));
+                const smshubMap = Object.fromEntries(smshubData.map(el => [el.country, el]));
+
+                for (const country of countriesData) {
+                    const smsActivateDoc = smsActivateMap[country.id_activate] || {};
+                    const fiveSimDoc = fiveSimMap[country.id_5sim] || {};
+                    const smspvaDoc = smspvaMap[country.id_smspva] || {};
+                    const smshubDoc = smshubMap[country.id_smshub] || {};
+                    const totalCount = (smsActivateDoc.count ?? 0) + (fiveSimDoc.count ?? 0) + (smspvaDoc.count ?? 0) + (smshubDoc.count ?? 0);
+                    const countryPrice = (
+                        ((smsActivateDoc.price ?? 0) / exchangeRate * (smsActivateDoc.count ?? 0)) +
+                        ((fiveSimDoc.price ?? 0) / exchangeRate * (fiveSimDoc.count ?? 0)) +
+                        ((smspvaDoc.price ?? 0) * (smspvaDoc.count ?? 0)) +
+                        ((smshubDoc.price ?? 0) * (smshubDoc.count ?? 0))
+                    ) / (totalCount || 1);
+
+                    if (totalCount > 0 || countryPrice > 0) {
+                        const row = {
+                            date: dayStr,
+                            serviceID,
+                            serviceName: serviceData?.name || '',
+                            countryID: country.id,
+                            exchangeRate,
+                            count: totalCount || null,
+                            priceUSD: totalCount > 0 ? countryPrice : null,
+                            smspva_count: smspvaDoc.count || 0,
+                            smspva_priceUSD: smspvaDoc.price || 0,
+                            smshub_count: smshubDoc.count || 0,
+                            smshub_priceUSD: smshubDoc.price || 0,
+                            sms_activate_count: smsActivateDoc.count || 0,
+                            sms_activate_priceRUB: smsActivateDoc.price || 0,
+                            '5sim_count': fiveSimDoc.count || 0,
+                            '5sim_priceRUB': fiveSimDoc.price || 0
+                        };
+
+                        stream.write(Object.values(row).join(',') + '\n');
+                    }
+                }
+            }
+            this.logger.log(`Дані для сервісу ${serviceID} записані у CSV.`);
+        } catch (error) {
+            this.logger.error('Error in exportVerificationsByServiceToCSV:', error);
+        }
+    }
 
     async updateVerifications(source: string, part?: string): Promise<{ message: string }> {
         try {

@@ -1,32 +1,18 @@
-// import {VerificationDocument} from "../documents/verification.document";
-//
-// async updateCountryIndexes(day: string) {
+// async createVerificationsForAllServices(month: string) {
 //     try {
-//         const verificationsSnapshot = await this.verificationsCollection
-//             .where('day', '==', day)
-//             .get();
-//
-//         const countriesSnapshot = await this.countriesCollection
-//             .where('not_used', '==', false)
-//             .get();
-//
-//         if (verificationsSnapshot.empty) {
-//             return null;
+//         const servicesSnapshot = await this.servicesCollection.get();
+//         if (servicesSnapshot.empty) {
+//             this.logger.warn('No services found.');
+//             return;
 //         }
-//         for (const countryDoc of countriesSnapshot.docs) {
-//             let totalCountryCount = 0
-//             verificationsSnapshot.docs.forEach(verificationDoc => {
-//                 const data = verificationDoc.data() as VerificationDocument;
-//                 if (data[countryDoc.id] && data[countryDoc.id].count > 0) {
-//                     totalCountryCount += data[countryDoc.id].count;
-//                 }
-//             });
 //
-//             await this.countriesCollection.doc(countryDoc.id).update({ totalCountryCount });
+//         for (const serviceDoc of servicesSnapshot.docs) {
+//             const serviceID = serviceDoc.id;
+//             this.logger.log(`Processing service: ${serviceID}`);
+//             await this.createVerificationsByServiceForMonth(serviceID, month);
 //         }
-//         return 'finish'
+//         this.logger.log(`Дані для всіх сервісів за місяць ${month} успішно оброблені.`);
 //     } catch (error) {
-//         this.logger.error('Error in getLastVerificationsByCountry:', error);
-//         throw error;
+//         this.logger.error('Error in createVerificationsForAllServices:', error);
 //     }
 // }
